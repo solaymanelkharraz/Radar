@@ -15,6 +15,7 @@ import {
   Code,
   ArrowUpRight,
 } from 'lucide-react';
+import { DailySourcingChecklist } from './DailySourcingChecklist';
 
 export const SOURCING_CATEGORIES = {
   'sourcing-it-support': {
@@ -319,6 +320,9 @@ export function SourcingCategoryView({ categoryId, searchQuery = '' }) {
         </div>
       </div>
 
+      {/* Daily Scouting Route Checklist */}
+      <DailySourcingChecklist />
+
       {/* ------------------------------------------------------------- */}
       {/* TOP CARD: Quick-Copy Keywords */}
       {/* ------------------------------------------------------------- */}
@@ -435,7 +439,7 @@ export function SourcingCategoryView({ categoryId, searchQuery = '' }) {
                     <button
                       onClick={() => handleCopyUrl(link.url)}
                       title="Copy URL"
-                      className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors"
+                      className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                       {isCopied ? (
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
