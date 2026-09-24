@@ -1,12 +1,13 @@
 import React from 'react';
 import { LayoutDashboard, Building2, Plus, Radar as RadarIcon, Database } from 'lucide-react';
 import { SourcingHub } from './SourcingHub';
+import { KeywordVault } from './KeywordVault';
 import { isDemoMode } from '../../config/supabaseClient';
 
 export function Sidebar({ activeView, setActiveView, onOpenAddApp, onOpenAddCompany, applicationsCount, companiesCount }) {
   return (
     <aside className="w-full md:w-80 flex-shrink-0 bg-white border-r border-slate-200 p-6 flex flex-col justify-between min-h-screen">
-      <div className="space-y-7">
+      <div className="space-y-6">
         {/* Brand Logo Header */}
         <div className="flex items-center gap-3.5 px-2 py-2">
           <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 shadow-sm">
@@ -92,8 +93,9 @@ export function Sidebar({ activeView, setActiveView, onOpenAddApp, onOpenAddComp
         </nav>
 
         {/* Sourcing Hub Launchpad Widget */}
-        <div className="pt-2">
+        <div className="pt-1 space-y-4">
           <SourcingHub isCollapsible={true} />
+          <KeywordVault isCollapsible={true} />
         </div>
       </div>
 
