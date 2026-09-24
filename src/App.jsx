@@ -5,9 +5,7 @@ import { ApplicationsBoard } from './components/applications/ApplicationsBoard';
 import { ApplicationModal } from './components/applications/ApplicationModal';
 import { CompanyDirectory } from './components/companies/CompanyDirectory';
 import { CompanyModal } from './components/companies/CompanyModal';
-import { LocalSourcing } from './components/sourcing/LocalSourcing';
-import { RemoteSourcing } from './components/sourcing/RemoteSourcing';
-import { KeywordVault } from './components/layout/KeywordVault';
+import { SourcingCategoryView } from './components/sourcing/SourcingCategoryView';
 import { Toast } from './components/ui/Toast';
 import {
   subscribeApplications,
@@ -22,7 +20,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function App() {
-  // Navigation activeView state: 'applications' | 'companies' | 'local-sourcing' | 'remote-sourcing' | 'keyword-vault'
+  // Active view state: 'applications' | 'companies' | 'sourcing-it-support' | 'sourcing-back-office' | 'sourcing-government' | 'sourcing-remote'
   const [activeView, setActiveView] = useState('applications');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -227,39 +225,15 @@ export default function App() {
               </motion.div>
             )}
 
-            {activeView === 'local-sourcing' && (
+            {activeView.startsWith('sourcing-') && (
               <motion.div
-                key="local-sourcing"
+                key={activeView}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <LocalSourcing searchQuery={searchQuery} />
-              </motion.div>
-            )}
-
-            {activeView === 'remote-sourcing' && (
-              <motion.div
-                key="remote-sourcing"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.15 }}
-              >
-                <RemoteSourcing searchQuery={searchQuery} />
-              </motion.div>
-            )}
-
-            {activeView === 'keyword-vault' && (
-              <motion.div
-                key="keyword-vault"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.15 }}
-              >
-                <KeywordVault searchQuery={searchQuery} isCollapsible={false} />
+                <SourcingCategoryView categoryId={activeView} searchQuery={searchQuery} />
               </motion.div>
             )}
           </AnimatePresence>

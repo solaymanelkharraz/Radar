@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
 import {
-  Folder,
-  Target,
-  Wrench,
-  Settings,
   Briefcase,
   Building2,
-  MapPin,
-  Globe,
-  Tag,
+  Compass,
+  Headphones,
+  Package,
+  Landmark,
+  Laptop,
   Database,
   ChevronDown,
   ChevronRight,
   Plus,
   Radar as RadarIcon,
-  Sparkles,
 } from 'lucide-react';
 import { isDemoMode } from '../../config/supabaseClient';
 
@@ -26,17 +23,41 @@ export function Sidebar({
   applicationsCount = 0,
   companiesCount = 0,
 }) {
-  // Collapsible section expanded states
-  const [sections, setSections] = useState({
-    tracking: true,
-    sourcing: true,
-    tools: true,
-    system: true,
-  });
+  // Accordion state for Sourcing Hub sub-links
+  const [isSourcingOpen, setIsSourcingOpen] = useState(true);
 
-  const toggleSection = (key) => {
-    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const sourcingItems = [
+    {
+      id: 'sourcing-it-support',
+      label: 'IT Support & Helpdesk',
+      icon: Headphones,
+      badge: 'BPO / Tangier',
+      color: 'text-blue-600',
+    },
+    {
+      id: 'sourcing-back-office',
+      label: 'Back-Office & TFZ Logistics',
+      icon: Package,
+      badge: 'TFZ / Port',
+      color: 'text-amber-600',
+    },
+    {
+      id: 'sourcing-government',
+      label: 'Government Concours',
+      icon: Landmark,
+      badge: 'Public Sector',
+      color: 'text-emerald-600',
+    },
+    {
+      id: 'sourcing-remote',
+      label: 'Online & Remote Work',
+      icon: Laptop,
+      badge: 'Global Remote',
+      color: 'text-purple-600',
+    },
+  ];
+
+  const isSourcingActive = activeView.startsWith('sourcing-');
 
   return (
     <aside className="w-full md:w-80 flex-shrink-0 bg-white border-r border-slate-200 p-6 flex flex-col justify-between min-h-screen font-sans selection:bg-blue-500/20">
@@ -80,225 +101,142 @@ export function Sidebar({
           </div>
         </div>
 
-        {/* Navigation Sections */}
-        <nav className="space-y-5">
-          {/* SECTION 1: 📁 TRACKING */}
-          <div className="space-y-1.5">
-            <button
-              onClick={() => toggleSection('tracking')}
-              className="w-full flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 px-2 py-1 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Folder className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                <span>Tracking</span>
-              </div>
-              {sections.tracking ? (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              )}
-            </button>
-
-            {sections.tracking && (
-              <div className="space-y-1 pl-1">
-                <button
-                  onClick={() => setActiveView('applications')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    activeView === 'applications'
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Briefcase
-                      className={`w-4 h-4 ${
-                        activeView === 'applications' ? 'text-blue-600' : 'text-slate-400'
-                      }`}
-                    />
-                    <span>Opportunity Vault</span>
-                  </div>
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
-                      activeView === 'applications'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {applicationsCount}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setActiveView('companies')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    activeView === 'companies'
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Building2
-                      className={`w-4 h-4 ${
-                        activeView === 'companies' ? 'text-blue-600' : 'text-slate-400'
-                      }`}
-                    />
-                    <span>Company Directory</span>
-                  </div>
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
-                      activeView === 'companies'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {companiesCount}
-                  </span>
-                </button>
-              </div>
-            )}
+        {/* High-Level Navigation Links */}
+        <nav className="space-y-2">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1">
+            Navigation
           </div>
 
-          {/* SECTION 2: 🎯 SOURCING HUB */}
-          <div className="space-y-1.5">
-            <button
-              onClick={() => toggleSection('sourcing')}
-              className="w-full flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 px-2 py-1 transition-colors group cursor-pointer"
+          {/* 1. Opportunity Vault */}
+          <button
+            onClick={() => setActiveView('applications')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              activeView === 'applications'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Briefcase
+                className={`w-4 h-4 ${
+                  activeView === 'applications' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
+              <span>Opportunity Vault</span>
+            </div>
+            <span
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                activeView === 'applications'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
             >
-              <div className="flex items-center gap-2">
-                <Target className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+              {applicationsCount}
+            </span>
+          </button>
+
+          {/* 2. Company Directory */}
+          <button
+            onClick={() => setActiveView('companies')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              activeView === 'companies'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Building2
+                className={`w-4 h-4 ${
+                  activeView === 'companies' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
+              <span>Company Directory</span>
+            </div>
+            <span
+              className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                activeView === 'companies'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {companiesCount}
+            </span>
+          </button>
+
+          {/* 3. Sourcing Hub (Expandable Accordion) */}
+          <div className="pt-2 space-y-1">
+            <button
+              onClick={() => setIsSourcingOpen(!isSourcingOpen)}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                isSourcingActive
+                  ? 'bg-slate-100 text-slate-900 font-extrabold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Compass
+                  className={`w-4 h-4 ${isSourcingActive ? 'text-blue-600' : 'text-slate-400'}`}
+                />
                 <span>Sourcing Hub</span>
               </div>
-              {sections.sourcing ? (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              {isSourcingOpen ? (
+                <ChevronDown className="w-4 h-4 text-slate-400" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-slate-400" />
               )}
             </button>
 
-            {sections.sourcing && (
-              <div className="space-y-1 pl-1">
-                <button
-                  onClick={() => setActiveView('local-sourcing')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    activeView === 'local-sourcing'
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <MapPin
-                      className={`w-4 h-4 ${
-                        activeView === 'local-sourcing' ? 'text-blue-600' : 'text-slate-400'
+            {/* Sourcing Hub 4 Sub-Categories */}
+            {isSourcingOpen && (
+              <div className="pl-3 space-y-1 pt-1 border-l-2 border-slate-100 ml-5">
+                {sourcingItems.map((item) => {
+                  const ItemIcon = item.icon;
+                  const isActive = activeView === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveView(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
-                    />
-                    <span>Local Jobs (Tangier)</span>
-                  </div>
-                  <span className="text-[10px] uppercase font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                    Local
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setActiveView('remote-sourcing')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    activeView === 'remote-sourcing'
-                      ? 'bg-purple-50 text-purple-700 border border-purple-200 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Globe
-                      className={`w-4 h-4 ${
-                        activeView === 'remote-sourcing' ? 'text-purple-600' : 'text-slate-400'
-                      }`}
-                    />
-                    <span>Online / Remote Jobs</span>
-                  </div>
-                  <span className="text-[10px] uppercase font-extrabold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
-                    Global
-                  </span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* SECTION 3: 🛠️ TOOLS */}
-          <div className="space-y-1.5">
-            <button
-              onClick={() => toggleSection('tools')}
-              className="w-full flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 px-2 py-1 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Wrench className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-600 transition-colors" />
-                <span>Tools</span>
-              </div>
-              {sections.tools ? (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              )}
-            </button>
-
-            {sections.tools && (
-              <div className="space-y-1 pl-1">
-                <button
-                  onClick={() => setActiveView('keyword-vault')}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    activeView === 'keyword-vault'
-                      ? 'bg-amber-50 text-amber-800 border border-amber-200 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Tag
-                      className={`w-4 h-4 ${
-                        activeView === 'keyword-vault' ? 'text-amber-600' : 'text-slate-400'
-                      }`}
-                    />
-                    <span>Keyword Vault</span>
-                  </div>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* SECTION 4: ⚙️ SYSTEM */}
-          <div className="space-y-1.5">
-            <button
-              onClick={() => toggleSection('system')}
-              className="w-full flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 px-2 py-1 transition-colors group cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Settings className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
-                <span>System</span>
-              </div>
-              {sections.system ? (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              )}
-            </button>
-
-            {sections.system && (
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 flex items-center justify-between mt-1">
-                <div className="flex items-center gap-2">
-                  <Database
-                    className={`w-4 h-4 ${isDemoMode ? 'text-amber-500' : 'text-emerald-600'}`}
-                  />
-                  <span className="font-semibold text-slate-700">
-                    {isDemoMode ? 'Demo Mode' : 'Supabase Live ⚡'}
-                  </span>
-                </div>
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    isDemoMode ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'
-                  }`}
-                />
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <ItemIcon
+                          className={`w-3.5 h-3.5 flex-shrink-0 ${
+                            isActive ? 'text-blue-600' : 'text-slate-400'
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
         </nav>
+      </div>
+
+      {/* Footer System Status */}
+      <div className="pt-6 border-t border-slate-200">
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Database
+              className={`w-4 h-4 ${isDemoMode ? 'text-amber-500' : 'text-emerald-600'}`}
+            />
+            <span className="font-semibold text-slate-700">
+              {isDemoMode ? 'Demo Mode' : 'Supabase Live ⚡'}
+            </span>
+          </div>
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isDemoMode ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'
+            }`}
+          />
+        </div>
       </div>
     </aside>
   );

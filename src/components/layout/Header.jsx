@@ -1,5 +1,15 @@
 import React from 'react';
-import { Search, Plus, Calendar, Award, MapPin, Globe, Tag } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Calendar,
+  Award,
+  Headphones,
+  Package,
+  Landmark,
+  Laptop,
+} from 'lucide-react';
+import { SOURCING_CATEGORIES } from '../sourcing/SourcingCategoryView';
 
 export function Header({
   activeView,
@@ -10,57 +20,47 @@ export function Header({
   interviewCount = 0,
 }) {
   const getHeaderInfo = () => {
-    switch (activeView) {
-      case 'applications':
-        return {
-          title: 'Opportunity Vault',
-          desc: 'Track job applications, public sector concours, and document checklists.',
-          searchPlaceholder: 'Search job, company, source...',
-          icon: null,
-        };
-      case 'companies':
-        return {
-          title: 'Company & HR Directory',
-          desc: 'Manage corporate contacts, HR emails, and spontaneous submission pitches.',
-          searchPlaceholder: 'Search company, sector, HR email...',
-          icon: null,
-        };
-      case 'local-sourcing':
-        return {
-          title: 'Local Jobs Launchpad (Tangier & Morocco)',
-          desc: 'Moroccan job portals, public sector concours, business directories, and Tangier BPO centers.',
-          searchPlaceholder: 'Filter local portals & companies...',
-          icon: MapPin,
-        };
-      case 'remote-sourcing':
-        return {
-          title: 'Online & Remote Jobs Hub',
-          desc: 'Global remote startup job boards, freelance platforms, and Boolean search strings.',
-          searchPlaceholder: 'Filter remote platforms & keywords...',
-          icon: Globe,
-        };
-      case 'keyword-vault':
-        return {
-          title: 'Keyword Vault & Search Terms',
-          desc: 'Quick-copy search terms for LinkedIn, Indeed, and Emploi-Public.',
-          searchPlaceholder: 'Filter search terms & keywords...',
-          icon: Tag,
-        };
-      default:
-        return {
-          title: 'Dashboard',
-          desc: 'Radar Job Tracking & Sourcing Hub',
-          searchPlaceholder: 'Search...',
-          icon: null,
-        };
+    if (activeView === 'applications') {
+      return {
+        title: 'Opportunity Vault',
+        desc: 'Track job applications, public sector concours, and document checklists.',
+        searchPlaceholder: 'Search job, company, source...',
+        icon: null,
+      };
     }
+
+    if (activeView === 'companies') {
+      return {
+        title: 'Company & HR Directory',
+        desc: 'Manage corporate contacts, HR emails, and spontaneous submission pitches.',
+        searchPlaceholder: 'Search company, sector, HR email...',
+        icon: null,
+      };
+    }
+
+    const sourcingCat = SOURCING_CATEGORIES[activeView];
+    if (sourcingCat) {
+      return {
+        title: sourcingCat.title,
+        desc: sourcingCat.subtitle,
+        searchPlaceholder: `Search ${sourcingCat.title.toLowerCase()} portals & terms...`,
+        icon: sourcingCat.icon,
+      };
+    }
+
+    return {
+      title: 'Dashboard',
+      desc: 'Radar Job Tracking & Sourcing Hub',
+      searchPlaceholder: 'Search...',
+      icon: null,
+    };
   };
 
   const info = getHeaderInfo();
   const IconComponent = info.icon;
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-6">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-6 font-sans">
       {/* Title section */}
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
@@ -108,7 +108,7 @@ export function Header({
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold cursor-pointer"
             >
               ✕
             </button>
