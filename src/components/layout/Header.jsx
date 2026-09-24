@@ -4,10 +4,7 @@ import {
   Plus,
   Calendar,
   Award,
-  Headphones,
-  Package,
-  Landmark,
-  Laptop,
+  Compass,
 } from 'lucide-react';
 import { SOURCING_CATEGORIES } from '../sourcing/SourcingCategoryView';
 
@@ -20,6 +17,15 @@ export function Header({
   interviewCount = 0,
 }) {
   const getHeaderInfo = () => {
+    if (activeView === 'daily-route') {
+      return {
+        title: 'Daily Scouting Route',
+        desc: 'Plan of the Day: 8-step daily scouting checklist for local Tangier, concours & remote targets.',
+        searchPlaceholder: 'Filter route tasks & categories...',
+        icon: Compass,
+      };
+    }
+
     if (activeView === 'applications') {
       return {
         title: 'Opportunity Vault',
@@ -115,14 +121,14 @@ export function Header({
           )}
         </div>
 
-        {/* Action Button (Show on applications & companies views) */}
-        {(activeView === 'applications' || activeView === 'companies') && (
+        {/* Action Button */}
+        {(activeView === 'applications' || activeView === 'companies' || activeView === 'daily-route') && (
           <button
             onClick={onOpenAdd}
             className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>{activeView === 'applications' ? 'New Opportunity' : 'New Company'}</span>
+            <span>+ New Opportunity</span>
           </button>
         )}
       </div>

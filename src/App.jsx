@@ -6,6 +6,7 @@ import { ApplicationModal } from './components/applications/ApplicationModal';
 import { CompanyDirectory } from './components/companies/CompanyDirectory';
 import { CompanyModal } from './components/companies/CompanyModal';
 import { SourcingCategoryView } from './components/sourcing/SourcingCategoryView';
+import { DailyRoutePage } from './components/sourcing/DailyRoutePage';
 import { Toast } from './components/ui/Toast';
 import {
   subscribeApplications,
@@ -20,8 +21,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function App() {
-  // Active view state: 'applications' | 'companies' | 'sourcing-it-support' | 'sourcing-back-office' | 'sourcing-government' | 'sourcing-remote'
-  const [activeView, setActiveView] = useState('applications');
+  // Default activeView state set to 'daily-route' (The FIRST page that opens!)
+  const [activeView, setActiveView] = useState('daily-route');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Data states
@@ -179,13 +180,27 @@ export default function App() {
           activeView={activeView}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          onOpenAdd={activeView === 'applications' ? handleOpenAddApp : handleOpenAddCompany}
+          onOpenAdd={handleOpenAddApp}
           upcomingCount={pendingCount}
           interviewCount={archiveCount}
         />
 
         <main className="flex-1 pb-12">
           <AnimatePresence mode="wait">
+            {/* 1. FIRST PAGE THAT OPENS: Daily Scouting Route */}
+            {activeView === 'daily-route' && (
+              <motion.div
+                key="daily-route"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <DailyRoutePage onNavigateCategory={handleSelectView} />
+              </motion.div>
+            )}
+
+            {/* 2. Opportunity Vault */}
             {activeView === 'applications' && (
               <motion.div
                 key="applications"
@@ -205,6 +220,7 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* 3. Company Directory */}
             {activeView === 'companies' && (
               <motion.div
                 key="companies"
@@ -225,6 +241,7 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* 4. Sourcing Hub Category Sub-Pages */}
             {activeView.startsWith('sourcing-') && (
               <motion.div
                 key={activeView}

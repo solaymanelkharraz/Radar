@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
+  Compass,
   Briefcase,
   Building2,
-  Compass,
   Headphones,
   Package,
   Landmark,
@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Plus,
   Radar as RadarIcon,
+  CheckSquare,
 } from 'lucide-react';
 import { isDemoMode } from '../../config/supabaseClient';
 
@@ -31,28 +32,24 @@ export function Sidebar({
       id: 'sourcing-it-support',
       label: 'IT Support & Helpdesk',
       icon: Headphones,
-      badge: 'BPO / Tangier',
       color: 'text-blue-600',
     },
     {
       id: 'sourcing-back-office',
       label: 'Back-Office & TFZ Logistics',
       icon: Package,
-      badge: 'TFZ / Port',
       color: 'text-amber-600',
     },
     {
       id: 'sourcing-government',
       label: 'Government Concours',
       icon: Landmark,
-      badge: 'Public Sector',
       color: 'text-emerald-600',
     },
     {
       id: 'sourcing-remote',
       label: 'Online & Remote Work',
       icon: Laptop,
-      badge: 'Global Remote',
       color: 'text-purple-600',
     },
   ];
@@ -107,7 +104,29 @@ export function Sidebar({
             Navigation
           </div>
 
-          {/* 1. Opportunity Vault */}
+          {/* 1. Daily Scouting Route (FIRST PAGE THAT OPENS) */}
+          <button
+            onClick={() => setActiveView('daily-route')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              activeView === 'daily-route'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Compass
+                className={`w-4 h-4 ${
+                  activeView === 'daily-route' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
+              <span>Daily Scouting Route</span>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 border border-blue-200">
+              Start
+            </span>
+          </button>
+
+          {/* 2. Opportunity Vault */}
           <button
             onClick={() => setActiveView('applications')}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -135,7 +154,7 @@ export function Sidebar({
             </span>
           </button>
 
-          {/* 2. Company Directory */}
+          {/* 3. Company Directory */}
           <button
             onClick={() => setActiveView('companies')}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -163,7 +182,7 @@ export function Sidebar({
             </span>
           </button>
 
-          {/* 3. Sourcing Hub (Expandable Accordion) */}
+          {/* 4. Sourcing Hub (Expandable Accordion) */}
           <div className="pt-2 space-y-1">
             <button
               onClick={() => setIsSourcingOpen(!isSourcingOpen)}
@@ -174,7 +193,7 @@ export function Sidebar({
               }`}
             >
               <div className="flex items-center gap-3">
-                <Compass
+                <CheckSquare
                   className={`w-4 h-4 ${isSourcingActive ? 'text-blue-600' : 'text-slate-400'}`}
                 />
                 <span>Sourcing Hub</span>
