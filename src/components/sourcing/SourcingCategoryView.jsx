@@ -15,7 +15,6 @@ import {
   Code,
   ArrowUpRight,
 } from 'lucide-react';
-import { DailySourcingChecklist } from './DailySourcingChecklist';
 
 export const SOURCING_CATEGORIES = {
   'sourcing-it-support': {
@@ -319,9 +318,6 @@ export function SourcingCategoryView({ categoryId, searchQuery = '' }) {
           </span>
         </div>
       </div>
-
-      {/* Daily Scouting Route Checklist */}
-      <DailySourcingChecklist />
 
       {/* ------------------------------------------------------------- */}
       {/* TOP CARD: Quick-Copy Keywords */}
