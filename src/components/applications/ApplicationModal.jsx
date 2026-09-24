@@ -1,26 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Briefcase, Link2, FileText } from 'lucide-react';
+import { X, Save, Briefcase, Link2, FileText, CheckCircle2, Clock } from 'lucide-react';
 
 export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, companiesList = [] }) {
+  const sources = [
+    'LinkedIn',
+    'Indeed',
+    'Company Portal',
+    'Emploi-Public',
+    'ReKrute',
+    'Anapec',
+    'Remote Board',
+    'Spontaneous',
+  ];
+
+  const statuses = [
+    { label: 'To Apply', value: 'To Apply' },
+    { label: 'Applied', value: 'Applied' },
+  ];
+
   const [formData, setFormData] = useState({
     companyName: '',
     jobTitle: '',
-    source: 'Emploi-Public',
+    source: 'LinkedIn',
+    status: 'To Apply',
     linkToApply: '',
     deadlineDate: '',
     requirements: '',
     notes: '',
   });
 
-  const sources = ['Emploi-Public', 'Rekrute', 'Anapec', 'Wadifa', 'Spontaneous'];
-
   useEffect(() => {
     if (applicationToEdit) {
       setFormData({
         companyName: applicationToEdit.companyName || '',
         jobTitle: applicationToEdit.jobTitle || '',
-        source: applicationToEdit.source || 'Emploi-Public',
+        source: applicationToEdit.source || 'LinkedIn',
+        status: applicationToEdit.isApplied ? 'Applied' : 'To Apply',
         linkToApply: applicationToEdit.linkToApply || '',
         deadlineDate: applicationToEdit.deadlineDate || '',
         requirements: applicationToEdit.requirements || '',
@@ -30,7 +46,8 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
       setFormData({
         companyName: '',
         jobTitle: '',
-        source: 'Emploi-Public',
+        source: 'LinkedIn',
+        status: 'To Apply',
         linkToApply: '',
         deadlineDate: new Date().toISOString().split('T')[0],
         requirements: '',
@@ -44,7 +61,17 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.companyName.trim() || !formData.jobTitle.trim()) return;
-    onSave(formData);
+
+    onSave({
+      companyName: formData.companyName.trim(),
+      jobTitle: formData.jobTitle.trim(),
+      source: formData.source,
+      isApplied: formData.status === 'Applied',
+      linkToApply: formData.linkToApply.trim(),
+      deadlineDate: formData.deadlineDate,
+      requirements: formData.requirements.trim(),
+      notes: formData.notes.trim(),
+    });
   };
 
   return (
@@ -54,7 +81,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden"
+          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden font-sans"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
@@ -64,7 +91,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
             </h3>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -83,7 +110,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                 placeholder="e.g. Ingénieur d'État en Informatique, Full-Stack Developer..."
                 value={formData.jobTitle}
                 onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
               />
             </div>
 
@@ -99,7 +126,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                 placeholder="e.g. Ministère de la Transition Numérique, Renault Group Tanger..."
                 value={formData.companyName}
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
               />
               <datalist id="companies-list">
                 {companiesList.map((comp) => (
@@ -108,8 +135,9 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
               </datalist>
             </div>
 
-            {/* Grid 2-cols: Source & Deadline */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Grid 3-cols: Source Channel, Status & Deadline Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Source Channel */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Source Channel
@@ -117,7 +145,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                 <select
                   value={formData.source}
                   onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm cursor-pointer"
+                  className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-semibold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer"
                 >
                   {sources.map((src) => (
                     <option key={src} value={src} className="bg-white text-slate-900">
@@ -127,6 +155,25 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                 </select>
               </div>
 
+              {/* Status Dropdown */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer text-slate-900"
+                >
+                  {statuses.map((st) => (
+                    <option key={st.value} value={st.value} className="bg-white text-slate-900">
+                      {st.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Deadline Date */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Deadline Date
@@ -135,7 +182,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                   type="date"
                   value={formData.deadlineDate}
                   onChange={(e) => setFormData({ ...formData, deadlineDate: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                  className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
                 />
               </div>
             </div>
@@ -152,23 +199,23 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                   placeholder="https://www.emploi-public.ma/fr/concours..."
                   value={formData.linkToApply}
                   onChange={(e) => setFormData({ ...formData, linkToApply: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs font-mono"
                 />
               </div>
             </div>
 
-            {/* Required Documents / Criteria */}
+            {/* Required Documents & Criteria (Optional) */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-amber-600" />
-                Required Documents & Criteria *
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-slate-400" />
+                Required Documents & Criteria (Optional)
               </label>
               <textarea
-                rows="4"
-                placeholder="Paste exact documents needed here: CIN légalisée, copie diplôme, demande manuscrite..."
+                rows="3"
+                placeholder="Paste key requirements or documents needed (CIN, degree copy, cover letter)..."
                 value={formData.requirements}
                 onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                className="w-full px-4 py-3 bg-amber-50/50 border border-amber-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 font-mono shadow-sm"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono shadow-xs"
               />
             </div>
 
@@ -182,7 +229,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                 placeholder="Platform login notes, interview dates, submission details..."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs"
               />
             </div>
 
@@ -191,13 +238,13 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-sm transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-xs transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>{applicationToEdit ? 'Save Changes' : 'Add to Vault'}</span>
