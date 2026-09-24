@@ -5,6 +5,9 @@ import { ApplicationsBoard } from './components/applications/ApplicationsBoard';
 import { ApplicationModal } from './components/applications/ApplicationModal';
 import { CompanyDirectory } from './components/companies/CompanyDirectory';
 import { CompanyModal } from './components/companies/CompanyModal';
+import { LocalSourcing } from './components/sourcing/LocalSourcing';
+import { RemoteSourcing } from './components/sourcing/RemoteSourcing';
+import { KeywordVault } from './components/layout/KeywordVault';
 import { Toast } from './components/ui/Toast';
 import {
   subscribeApplications,
@@ -19,7 +22,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('applications'); // 'applications' | 'companies'
+  // Navigation activeView state: 'applications' | 'companies' | 'local-sourcing' | 'remote-sourcing' | 'keyword-vault'
+  const [activeView, setActiveView] = useState('applications');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Data states
@@ -57,6 +61,12 @@ export default function App() {
       if (unsubComp) unsubComp();
     };
   }, []);
+
+  // Reset search query when activeView changes
+  const handleSelectView = (viewId) => {
+    setActiveView(viewId);
+    setSearchQuery('');
+  };
 
   // -------------------------------------------------------------
   // APPLICATION HANDLERS
@@ -97,7 +107,10 @@ export default function App() {
 
   const handleToggleAppliedApp = async (id, isApplied) => {
     await updateApplication(id, { isApplied });
-    showToast(isApplied ? 'Moved to Done / Archive ✓' : 'Moved back to Pending (Action Needed)', isApplied ? 'success' : 'info');
+    showToast(
+      isApplied ? 'Moved to Done / Archive ✓' : 'Moved back to Pending (Action Needed)',
+      isApplied ? 'success' : 'info'
+    );
   };
 
   // -------------------------------------------------------------
@@ -155,7 +168,7 @@ export default function App() {
       {/* Sidebar */}
       <Sidebar
         activeView={activeView}
-        setActiveView={setActiveView}
+        setActiveView={handleSelectView}
         onOpenAddApp={handleOpenAddApp}
         onOpenAddCompany={handleOpenAddCompany}
         applicationsCount={applications.length}
@@ -175,7 +188,7 @@ export default function App() {
 
         <main className="flex-1 pb-12">
           <AnimatePresence mode="wait">
-            {activeView === 'applications' ? (
+            {activeView === 'applications' && (
               <motion.div
                 key="applications"
                 initial={{ opacity: 0, y: 10 }}
@@ -192,7 +205,9 @@ export default function App() {
                   onOpenAdd={handleOpenAddApp}
                 />
               </motion.div>
-            ) : (
+            )}
+
+            {activeView === 'companies' && (
               <motion.div
                 key="companies"
                 initial={{ opacity: 0, y: 10 }}
@@ -209,6 +224,42 @@ export default function App() {
                   onStatusToggle={handleToggleCompanyStatus}
                   onOpenAdd={handleOpenAddCompany}
                 />
+              </motion.div>
+            )}
+
+            {activeView === 'local-sourcing' && (
+              <motion.div
+                key="local-sourcing"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <LocalSourcing searchQuery={searchQuery} />
+              </motion.div>
+            )}
+
+            {activeView === 'remote-sourcing' && (
+              <motion.div
+                key="remote-sourcing"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <RemoteSourcing searchQuery={searchQuery} />
+              </motion.div>
+            )}
+
+            {activeView === 'keyword-vault' && (
+              <motion.div
+                key="keyword-vault"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <KeywordVault searchQuery={searchQuery} isCollapsible={false} />
               </motion.div>
             )}
           </AnimatePresence>
