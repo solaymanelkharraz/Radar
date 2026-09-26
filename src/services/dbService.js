@@ -30,6 +30,7 @@ const mapAppFromSupabase = (row) => ({
   companyName: row.company_name || row.companyName,
   jobTitle: row.job_title || row.jobTitle,
   source: row.source,
+  priority: row.priority || 'Medium',
   linkToApply: row.link_to_apply || row.linkToApply || '',
   deadlineDate: row.deadline_date || row.deadlineDate,
   isApplied: row.is_applied !== undefined ? row.is_applied : (row.isApplied ?? false),
@@ -42,6 +43,7 @@ const mapAppToSupabase = (app) => ({
   company_name: app.companyName,
   job_title: app.jobTitle,
   source: app.source,
+  priority: app.priority || 'Medium',
   link_to_apply: app.linkToApply || null,
   deadline_date: app.deadlineDate || null,
   is_applied: app.isApplied ?? false,
@@ -99,13 +101,11 @@ export const subscribeApplications = (callback) => {
 
     fetchApps();
 
-    // Event listener for immediate local write triggers
     const handleImmediateUpdate = () => {
       fetchApps();
     };
     window.addEventListener('radar_app_update', handleImmediateUpdate);
 
-    // Supabase Realtime channel subscription
     const channel = supabase
       .channel('public:applications')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
@@ -121,22 +121,27 @@ export const subscribeApplications = (callback) => {
 };
 
 export const addApplication = async (appData) => {
+  const newItem = {
+    ...appData,
+    priority: appData.priority || 'Medium',
+    isApplied: appData.isApplied ?? false,
+  };
+
   if (isDemoMode || !supabase) {
     const local = getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
     const id = 'app-' + Date.now();
-    const newItem = { id, ...appData, isApplied: appData.isApplied ?? false, createdAt: Date.now() };
-    const updated = [newItem, ...local];
+    const itemToSave = { id, ...newItem, createdAt: Date.now() };
+    const updated = [itemToSave, ...local];
     saveLocalData(STORAGE_KEYS.APPLICATIONS, updated);
     window.dispatchEvent(new Event('radar_app_update'));
-    return newItem;
+    return itemToSave;
   } else {
-    const payload = mapAppToSupabase(appData);
+    const payload = mapAppToSupabase(newItem);
     const { data, error } = await supabase.from('applications').insert([payload]).select();
     if (error) {
       console.error('Error adding application to Supabase:', error);
       throw error;
     }
-    // Trigger immediate local re-fetch event
     window.dispatchEvent(new Event('radar_app_update'));
     return mapAppFromSupabase(data[0]);
   }
@@ -149,7 +154,17 @@ export const updateApplication = async (id, appData) => {
     saveLocalData(STORAGE_KEYS.APPLICATIONS, updated);
     window.dispatchEvent(new Event('radar_app_update'));
   } else {
-    const payload = mapAppToSupabase(appData);
+    const payload = {};
+    if (appData.companyName !== undefined) payload.company_name = appData.companyName;
+    if (appData.jobTitle !== undefined) payload.job_title = appData.jobTitle;
+    if (appData.source !== undefined) payload.source = appData.source;
+    if (appData.priority !== undefined) payload.priority = appData.priority;
+    if (appData.linkToApply !== undefined) payload.link_to_apply = appData.linkToApply || null;
+    if (appData.deadlineDate !== undefined) payload.deadline_date = appData.deadlineDate || null;
+    if (appData.isApplied !== undefined) payload.is_applied = appData.isApplied;
+    if (appData.requirements !== undefined) payload.requirements = appData.requirements || null;
+    if (appData.notes !== undefined) payload.notes = appData.notes || null;
+
     const { error } = await supabase.from('applications').update(payload).eq('id', id);
     if (error) {
       console.error('Error updating application in Supabase:', error);

@@ -2,11 +2,12 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Calendar, CheckCircle, RotateCcw, Edit2, Trash2, FileText, Building2, AlertTriangle, Link2 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { PriorityBadge } from '../ui/PriorityBadge';
 
 export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, onDelete, onToggleApplied }) {
   if (!isOpen || !application) return null;
 
-  const { id, companyName, jobTitle, source, linkToApply, deadlineDate, isApplied, requirements, notes } = application;
+  const { id, companyName, jobTitle, source, priority = 'Medium', linkToApply, deadlineDate, isApplied, requirements, notes } = application;
 
   // Calculate deadline urgency
   const calculateDeadline = (dateStr) => {
@@ -53,8 +54,9 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
         >
           {/* Drawer Header */}
           <div className="p-6 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Badge variant={source}>{source || 'Spontaneous'}</Badge>
+              <PriorityBadge priority={priority} />
               {isUrgent && (
                 <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 uppercase tracking-wider">
                   <AlertTriangle className="w-3 h-3 text-amber-600" />
@@ -118,11 +120,11 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
 
             {/* Required Documents / Criteria Section */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-800">
-                <FileText className="w-4 h-4 text-amber-600" />
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700">
+                <FileText className="w-4 h-4 text-slate-400" />
                 <span>Required Documents & Criteria</span>
               </div>
-              <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200 text-xs text-slate-800 font-mono leading-relaxed whitespace-pre-line min-h-[100px]">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 font-mono leading-relaxed whitespace-pre-line min-h-[100px]">
                 {requirements || 'No specific document requirements listed.'}
               </div>
             </div>

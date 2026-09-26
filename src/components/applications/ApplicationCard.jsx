@@ -2,9 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Calendar, AlertTriangle, ChevronRight } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { PriorityBadge } from '../ui/PriorityBadge';
 
 export function ApplicationCard({ application, onClick }) {
-  const { companyName, jobTitle, source, deadlineDate, isApplied } = application;
+  const { companyName, jobTitle, source, priority = 'Medium', deadlineDate, isApplied } = application;
 
   // Calculate deadline urgency
   const calculateDeadline = (dateStr) => {
@@ -49,9 +50,12 @@ export function ApplicationCard({ application, onClick }) {
         className={`group rounded-2xl p-5 border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 ${cardStyleClass}`}
       >
         <div className="space-y-3">
-          {/* Top Row: Source badge & Urgency indicator */}
-          <div className="flex items-center justify-between gap-3">
-            <Badge variant={source}>{source || 'Spontaneous'}</Badge>
+          {/* Top Row: Source badge, Priority badge & Urgency indicator */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Badge variant={source}>{source || 'Spontaneous'}</Badge>
+              <PriorityBadge priority={priority} />
+            </div>
 
             {isUrgent && (
               <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 uppercase tracking-wider">

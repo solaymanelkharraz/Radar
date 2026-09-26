@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Briefcase, Link2, FileText, CheckCircle2, Clock } from 'lucide-react';
+import { X, Save, Briefcase, Link2, FileText } from 'lucide-react';
 
 export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, companiesList = [] }) {
   const sources = [
@@ -19,11 +19,18 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
     { label: 'Applied', value: 'Applied' },
   ];
 
+  const priorities = [
+    { label: '🔴 High Priority', value: 'High' },
+    { label: '🟡 Medium Priority', value: 'Medium' },
+    { label: '🟢 Low Priority', value: 'Low' },
+  ];
+
   const [formData, setFormData] = useState({
     companyName: '',
     jobTitle: '',
     source: 'LinkedIn',
     status: 'To Apply',
+    priority: 'Medium',
     linkToApply: '',
     deadlineDate: '',
     requirements: '',
@@ -37,6 +44,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
         jobTitle: applicationToEdit.jobTitle || '',
         source: applicationToEdit.source || 'LinkedIn',
         status: applicationToEdit.isApplied ? 'Applied' : 'To Apply',
+        priority: applicationToEdit.priority || 'Medium',
         linkToApply: applicationToEdit.linkToApply || '',
         deadlineDate: applicationToEdit.deadlineDate || '',
         requirements: applicationToEdit.requirements || '',
@@ -48,6 +56,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
         jobTitle: '',
         source: 'LinkedIn',
         status: 'To Apply',
+        priority: 'Medium',
         linkToApply: '',
         deadlineDate: new Date().toISOString().split('T')[0],
         requirements: '',
@@ -66,6 +75,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
       companyName: formData.companyName.trim(),
       jobTitle: formData.jobTitle.trim(),
       source: formData.source,
+      priority: formData.priority,
       isApplied: formData.status === 'Applied',
       linkToApply: formData.linkToApply.trim(),
       deadlineDate: formData.deadlineDate,
@@ -76,12 +86,12 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm overflow-y-auto font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden font-sans"
+          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
@@ -135,8 +145,8 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
               </datalist>
             </div>
 
-            {/* Grid 3-cols: Source Channel, Status & Deadline Date */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Grid: Source Channel, Status, Priority & Deadline Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Source Channel */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -168,6 +178,24 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                   {statuses.map((st) => (
                     <option key={st.value} value={st.value} className="bg-white text-slate-900">
                       {st.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Priority Dropdown */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Priority
+                </label>
+                <select
+                  value={formData.priority}
+                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer text-slate-900"
+                >
+                  {priorities.map((p) => (
+                    <option key={p.value} value={p.value} className="bg-white text-slate-900">
+                      {p.label}
                     </option>
                   ))}
                 </select>

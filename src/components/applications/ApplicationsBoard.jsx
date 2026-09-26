@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailDrawer } from './ApplicationDetailDrawer';
-import { Plus, Clock, Archive, CheckCircle2 } from 'lucide-react';
+import { Plus, Clock, Archive, CheckCircle2, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete, onToggleApplied, onOpenAdd }) {
   // Vault Tab Filter: 'pending' (isApplied: false) | 'archive' (isApplied: true)
   const [activeVaultTab, setActiveVaultTab] = useState('pending');
 
+  // Priority Filter: 'All' | 'High' | 'Medium' | 'Low'
+  const [priorityFilter, setPriorityFilter] = useState('All');
+
   // Selected Application for Detail Drawer
   const [selectedApp, setSelectedApp] = useState(null);
 
-  // Filter applications by search query
+  // Filter applications by search query AND priority filter
   const filteredApps = applications.filter((app) => {
+    const appPriority = app.priority || 'Medium';
+    const matchesPriority = priorityFilter === 'All' || appPriority === priorityFilter;
+
+    if (!matchesPriority) return false;
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -30,16 +38,16 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
   const currentTabApps = activeVaultTab === 'pending' ? pendingApps : archiveApps;
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 font-sans">
       {/* Opportunity Vault Top Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        {/* Filter Tabs: Pending (Action Needed) vs Done / Archive */}
-        <div className="flex items-center gap-3">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        {/* Left: Filter Tabs (Pending vs Archive) */}
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setActiveVaultTab('pending')}
             className={`flex items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
               activeVaultTab === 'pending'
-                ? 'bg-amber-50 text-amber-800 border border-amber-300 shadow-sm'
+                ? 'bg-amber-50 text-amber-800 border border-amber-300 shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
@@ -60,7 +68,7 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
             onClick={() => setActiveVaultTab('archive')}
             className={`flex items-center gap-3 px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
               activeVaultTab === 'archive'
-                ? 'bg-slate-100 text-slate-800 border border-slate-300 shadow-sm'
+                ? 'bg-slate-100 text-slate-800 border border-slate-300 shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
@@ -78,14 +86,32 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
           </button>
         </div>
 
-        {/* Quick Add Button */}
-        <button
-          onClick={onOpenAdd}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95 flex-shrink-0 cursor-pointer"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>+ Add Opportunity</span>
-        </button>
+        {/* Right: Priority Filter & Quick Add Button */}
+        <div className="flex flex-wrap items-center gap-3 justify-end">
+          {/* Priority Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-400" />
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer"
+            >
+              <option value="All">All Priorities</option>
+              <option value="High">🔴 High Priority</option>
+              <option value="Medium">🟡 Medium Priority</option>
+              <option value="Low">🟢 Low Priority</option>
+            </select>
+          </div>
+
+          {/* Quick Add Button */}
+          <button
+            onClick={onOpenAdd}
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center gap-2 shadow-xs transition-all active:scale-95 flex-shrink-0 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>+ Add Opportunity</span>
+          </button>
+        </div>
       </div>
 
       {/* Grid of Compact Cards */}
@@ -108,9 +134,11 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
               {activeVaultTab === 'pending' ? (
                 <>
                   <CheckCircle2 className="w-10 h-10 text-emerald-600" />
-                  <p className="text-base font-bold text-slate-900">All caught up!</p>
+                  <p className="text-base font-bold text-slate-900">No matching opportunities</p>
                   <p className="text-xs text-slate-500 max-w-sm">
-                    No pending opportunities requiring action. Click below to add a new offer to your vault.
+                    {priorityFilter !== 'All'
+                      ? `No ${priorityFilter} priority items in pending action.`
+                      : 'No pending opportunities requiring action. Click below to add a new offer to your vault.'}
                   </p>
                 </>
               ) : (
@@ -118,7 +146,9 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
                   <Archive className="w-10 h-10 text-slate-400" />
                   <p className="text-base font-bold text-slate-700">Archive is empty</p>
                   <p className="text-xs text-slate-500 max-w-sm">
-                    Mark opportunities as applied to move them to your archive vault.
+                    {priorityFilter !== 'All'
+                      ? `No ${priorityFilter} priority items in archive.`
+                      : 'Mark opportunities as applied to move them to your archive vault.'}
                   </p>
                 </>
               )}
