@@ -137,7 +137,17 @@ export const addApplication = async (appData) => {
     return itemToSave;
   } else {
     const payload = mapAppToSupabase(newItem);
-    const { data, error } = await supabase.from('applications').insert([payload]).select();
+    let { data, error } = await supabase.from('applications').insert([payload]).select();
+
+    // Fallback: If priority column does not exist yet in Supabase table schema
+    if (error && (error.code === 'PGRST204' || error.status === 400 || (error.message && error.message.includes('priority')))) {
+      console.warn('Supabase missing priority column. Retrying insert without priority field...');
+      delete payload.priority;
+      const retry = await supabase.from('applications').insert([payload]).select();
+      data = retry.data;
+      error = retry.error;
+    }
+
     if (error) {
       console.error('Error adding application to Supabase:', error);
       throw error;
@@ -165,7 +175,16 @@ export const updateApplication = async (id, appData) => {
     if (appData.requirements !== undefined) payload.requirements = appData.requirements || null;
     if (appData.notes !== undefined) payload.notes = appData.notes || null;
 
-    const { error } = await supabase.from('applications').update(payload).eq('id', id);
+    let { error } = await supabase.from('applications').update(payload).eq('id', id);
+
+    // Fallback: If priority column does not exist yet in Supabase table schema
+    if (error && (error.code === 'PGRST204' || error.status === 400 || (error.message && error.message.includes('priority')))) {
+      console.warn('Supabase missing priority column. Retrying update without priority field...');
+      delete payload.priority;
+      const retry = await supabase.from('applications').update(payload).eq('id', id);
+      error = retry.error;
+    }
+
     if (error) {
       console.error('Error updating application in Supabase:', error);
       throw error;
