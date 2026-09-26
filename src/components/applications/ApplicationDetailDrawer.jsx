@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { PriorityBadge } from '../ui/PriorityBadge';
+import { updateApplication } from '../../services/dbService';
 
 export function ApplicationDetailDrawer({
   isOpen,
@@ -25,18 +26,21 @@ export function ApplicationDetailDrawer({
   onEdit,
   onDelete,
   onToggleApplied,
+  onUpdateApp,
 }) {
+  const [currentApp, setCurrentApp] = useState(application);
   const [isEditingResponseUrl, setIsEditingResponseUrl] = useState(false);
   const [responseUrlInput, setResponseUrlInput] = useState('');
 
   useEffect(() => {
+    setCurrentApp(application);
     if (application) {
       setResponseUrlInput(application.responseUrl || application.response_url || '');
       setIsEditingResponseUrl(false);
     }
   }, [application]);
 
-  if (!isOpen || !application) return null;
+  if (!isOpen || !currentApp) return null;
 
   const {
     id,
@@ -50,12 +54,12 @@ export function ApplicationDetailDrawer({
     isApplied,
     requirements,
     notes,
-  } = application;
+  } = currentApp;
 
-  const displayJobTitle = jobTitle || application.job_title || 'Untitled Opportunity';
-  const displayCompanyName = companyName || application.company_name || 'Organization Not Specified';
-  const displayApplyLink = linkToApply || application.link_to_apply || '';
-  const displayResponseUrl = responseUrl || application.response_url || '';
+  const displayJobTitle = jobTitle || currentApp.job_title || 'Untitled Opportunity';
+  const displayCompanyName = companyName || currentApp.company_name || 'Organization Not Specified';
+  const displayApplyLink = linkToApply || currentApp.link_to_apply || '';
+  const displayResponseUrl = responseUrl || currentApp.response_url || '';
 
   // Calculate deadline urgency
   const calculateDeadline = (dateStr) => {
@@ -80,13 +84,19 @@ export function ApplicationDetailDrawer({
   const deadlineInfo = calculateDeadline(deadlineDate);
   const isUrgent = deadlineInfo.isUrgent && !isApplied;
 
-  const handleSaveResponseUrl = () => {
+  const handleSaveResponseUrl = async () => {
     const trimmed = responseUrlInput.trim();
-    onEdit({
-      ...application,
+    const updated = {
+      ...currentApp,
       responseUrl: trimmed,
-    });
+    };
+    setCurrentApp(updated);
     setIsEditingResponseUrl(false);
+
+    await updateApplication(id, { responseUrl: trimmed });
+    if (onUpdateApp) {
+      onUpdateApp(updated);
+    }
   };
 
   const handleMarkApplied = () => {
@@ -311,7 +321,7 @@ export function ApplicationDetailDrawer({
             <div className="flex items-center gap-3 pt-1">
               <button
                 onClick={() => {
-                  onEdit(application);
+                  onEdit(currentApp);
                   onClose();
                 }}
                 className="flex-1 py-2.5 px-3 rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"

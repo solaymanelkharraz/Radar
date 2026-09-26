@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailDrawer } from './ApplicationDetailDrawer';
 import { Plus, Clock, Archive, CheckCircle2, Filter, RotateCcw } from 'lucide-react';
@@ -13,6 +13,16 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
 
   // Selected Application for Detail Drawer
   const [selectedApp, setSelectedApp] = useState(null);
+
+  // Sync selectedApp with fresh application object when applications prop changes
+  useEffect(() => {
+    if (selectedApp) {
+      const fresh = applications.find((app) => app.id === selectedApp.id);
+      if (fresh) {
+        setSelectedApp(fresh);
+      }
+    }
+  }, [applications]);
 
   // Raw counts before search & priority filters
   const rawPendingCount = applications.filter((app) => !app.isApplied).length;
@@ -188,6 +198,7 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
         onEdit={onEdit}
         onDelete={onDelete}
         onToggleApplied={onToggleApplied}
+        onUpdateApp={(updated) => setSelectedApp(updated)}
       />
     </div>
   );
