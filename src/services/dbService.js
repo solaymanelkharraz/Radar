@@ -101,25 +101,33 @@ export const subscribeApplications = (callback) => {
           callback(localApps);
         } else {
           // Merge Supabase data with Local Storage cache to ensure zero data loss
-          const parsed = (data || []).map((row) => {
+          const parsedFromSupabase = (data || []).map((row) => {
             const mapped = mapAppFromSupabase(row);
             const localMatch = localApps.find((l) => l.id === mapped.id);
             if (localMatch) {
               return {
-                ...localMatch,
                 ...mapped,
+                ...localMatch,
                 companyName: mapped.companyName || localMatch.companyName || 'Unknown Organization',
                 jobTitle: mapped.jobTitle || localMatch.jobTitle || 'Untitled Opportunity',
                 requirements: mapped.requirements || localMatch.requirements || '',
                 notes: mapped.notes || localMatch.notes || '',
                 linkToApply: mapped.linkToApply || localMatch.linkToApply || '',
                 responseUrl: mapped.responseUrl || localMatch.responseUrl || '',
-                priority: mapped.priority || localMatch.priority || 'Medium',
+                priority: localMatch.priority || mapped.priority || 'Medium',
                 source: mapped.source || localMatch.source || 'Spontaneous',
+                isApplied: localMatch.isApplied !== undefined ? localMatch.isApplied : mapped.isApplied,
               };
             }
             return mapped;
           });
+
+          // Also preserve any local-only applications that have not hit Supabase yet
+          const localOnly = localApps.filter(
+            (localItem) => !parsedFromSupabase.some((p) => p.id === localItem.id)
+          );
+
+          const parsed = [...localOnly, ...parsedFromSupabase];
 
           saveLocalData(STORAGE_KEYS.APPLICATIONS, parsed);
           callback(parsed);

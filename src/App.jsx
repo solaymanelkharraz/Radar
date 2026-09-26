@@ -83,10 +83,16 @@ export default function App() {
   const handleSaveApp = async (formData) => {
     try {
       if (appToEdit) {
+        setApplications((prev) =>
+          prev.map((app) => (app.id === appToEdit.id ? { ...app, ...formData } : app))
+        );
         await updateApplication(appToEdit.id, formData);
         showToast('Opportunity updated in vault!', 'success');
       } else {
-        await addApplication(formData);
+        const saved = await addApplication(formData);
+        if (saved && saved.id) {
+          setApplications((prev) => [saved, ...prev.filter((a) => a.id !== saved.id)]);
+        }
         showToast('New opportunity added to vault!', 'success');
       }
       setIsAppModalOpen(false);
@@ -99,12 +105,17 @@ export default function App() {
 
   const handleDeleteApp = async (id) => {
     if (window.confirm('Are you sure you want to remove this opportunity from your vault?')) {
+      setApplications((prev) => prev.filter((app) => app.id !== id));
       await deleteApplication(id);
       showToast('Opportunity removed', 'info');
     }
   };
 
   const handleToggleAppliedApp = async (id, isApplied) => {
+    // Optimistically update React state immediately (<1ms)
+    setApplications((prev) =>
+      prev.map((app) => (app.id === id ? { ...app, isApplied } : app))
+    );
     await updateApplication(id, { isApplied });
     showToast(
       isApplied ? 'Moved to Done / Archive ✓' : 'Moved back to Pending (Action Needed)',
