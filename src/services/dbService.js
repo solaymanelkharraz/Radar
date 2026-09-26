@@ -61,6 +61,8 @@ const mapCompanyFromSupabase = (row) => ({
   hrEmail: row.hr_email || row.hrEmail,
   website: row.website,
   contactStatus: row.contact_status || row.contactStatus,
+  emailSubject: row.email_subject || row.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
+  emailBody: row.email_body !== undefined ? (row.email_body || "") : (row.emailBody || ""),
   createdAt: row.created_at || row.createdAt,
 });
 
@@ -71,6 +73,8 @@ const mapCompanyToSupabase = (company) => ({
   hr_email: company.hrEmail || null,
   website: company.website || null,
   contact_status: company.contactStatus || 'Not Contacted',
+  email_subject: company.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
+  email_body: company.emailBody || null,
 });
 
 // -------------------------------------------------------------
@@ -308,7 +312,31 @@ export const subscribeCompanies = (callback) => {
           console.warn('Error fetching companies from Supabase. Using local cache:', error);
           callback(localComp);
         } else {
-          const parsed = (data || []).map(mapCompanyFromSupabase);
+          const parsedFromSupabase = (data || []).map((row) => {
+            const mapped = mapCompanyFromSupabase(row);
+            const localMatch = localComp.find((l) => l.id === mapped.id);
+            if (localMatch) {
+              return {
+                ...mapped,
+                ...localMatch,
+                companyName: mapped.companyName || localMatch.companyName,
+                sector: mapped.sector || localMatch.sector,
+                location: mapped.location || localMatch.location,
+                hrEmail: mapped.hrEmail || localMatch.hrEmail,
+                website: mapped.website || localMatch.website,
+                contactStatus: localMatch.contactStatus || mapped.contactStatus || 'Not Contacted',
+                emailSubject: localMatch.emailSubject || mapped.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
+                emailBody: localMatch.emailBody !== undefined ? localMatch.emailBody : (mapped.emailBody || ""),
+              };
+            }
+            return mapped;
+          });
+
+          const localOnly = localComp.filter(
+            (localItem) => !parsedFromSupabase.some((p) => p.id === localItem.id)
+          );
+
+          const parsed = [...localOnly, ...parsedFromSupabase];
           saveLocalData(STORAGE_KEYS.COMPANIES, parsed);
           callback(parsed);
         }
@@ -345,14 +373,20 @@ export const subscribeCompanies = (callback) => {
 };
 
 export const addCompany = async (companyData) => {
+  const newItem = {
+    ...companyData,
+    emailSubject: companyData.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
+    emailBody: companyData.emailBody || "",
+  };
+
   const saveLocalCompany = () => {
     const local = getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES);
     const id = companyData.id || 'comp-' + Date.now();
-    const newItem = { id, ...companyData, createdAt: Date.now() };
-    const updated = [newItem, ...local];
+    const itemToSave = { id, ...newItem, createdAt: Date.now() };
+    const updated = [itemToSave, ...local];
     saveLocalData(STORAGE_KEYS.COMPANIES, updated);
     window.dispatchEvent(new Event('radar_company_update'));
-    return newItem;
+    return itemToSave;
   };
 
   if (isDemoMode || !supabase) {
@@ -360,13 +394,22 @@ export const addCompany = async (companyData) => {
   }
 
   try {
-    const payload = mapCompanyToSupabase(companyData);
-    const { data, error } = await supabase.from('companies').insert([payload]).select();
+    const payload = mapCompanyToSupabase(newItem);
+    let { data, error } = await supabase.from('companies').insert([payload]).select();
+
+    if (error && (error.code === 'PGRST204' || error.status === 400)) {
+      delete payload.email_subject;
+      delete payload.email_body;
+      const retry = await supabase.from('companies').insert([payload]).select();
+      data = retry.data;
+      error = retry.error;
+    }
+
     if (error) {
       console.warn('Error adding company to Supabase. Saving locally:', error);
       return saveLocalCompany();
     }
-    window.dispatchEvent(new Event('radar_company_update'));
+    saveLocalCompany();
     return mapCompanyFromSupabase(data[0]);
   } catch (err) {
     console.warn('Connection reset during addCompany. Saving locally:', err);
@@ -389,8 +432,25 @@ export const updateCompany = async (id, companyData) => {
   }
 
   try {
-    const payload = mapCompanyToSupabase(companyData);
-    const { error } = await supabase.from('companies').update(payload).eq('id', id);
+    const payload = {};
+    if (companyData.companyName !== undefined) payload.company_name = companyData.companyName;
+    if (companyData.sector !== undefined) payload.sector = companyData.sector || null;
+    if (companyData.location !== undefined) payload.location = companyData.location || null;
+    if (companyData.hrEmail !== undefined) payload.hr_email = companyData.hrEmail || null;
+    if (companyData.website !== undefined) payload.website = companyData.website || null;
+    if (companyData.contactStatus !== undefined) payload.contact_status = companyData.contactStatus;
+    if (companyData.emailSubject !== undefined) payload.email_subject = companyData.emailSubject;
+    if (companyData.emailBody !== undefined) payload.email_body = companyData.emailBody || null;
+
+    let { error } = await supabase.from('companies').update(payload).eq('id', id);
+
+    if (error && (error.code === 'PGRST204' || error.status === 400)) {
+      delete payload.email_subject;
+      delete payload.email_body;
+      const retry = await supabase.from('companies').update(payload).eq('id', id);
+      error = retry.error;
+    }
+
     if (error) {
       console.warn('Error updating company in Supabase. Saving locally:', error);
     }

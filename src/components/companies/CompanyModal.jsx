@@ -10,6 +10,8 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
     hrEmail: '',
     website: '',
     contactStatus: 'Not Contacted',
+    emailSubject: 'Candidature Spontanée : Développeur Full-Stack',
+    emailBody: '',
   });
 
   const sectors = [
@@ -33,6 +35,8 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         hrEmail: companyToEdit.hrEmail || '',
         website: companyToEdit.website || '',
         contactStatus: companyToEdit.contactStatus || 'Not Contacted',
+        emailSubject: companyToEdit.emailSubject || 'Candidature Spontanée : Développeur Full-Stack',
+        emailBody: companyToEdit.emailBody || '',
       });
     } else {
       setFormData({
@@ -42,6 +46,8 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         hrEmail: '',
         website: '',
         contactStatus: 'Not Contacted',
+        emailSubject: 'Candidature Spontanée : Développeur Full-Stack',
+        emailBody: '',
       });
     }
   }, [companyToEdit, isOpen]);
@@ -56,29 +62,29 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-sm overflow-y-auto font-sans">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden"
+          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80 flex-shrink-0">
             <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-3">
               <Building2 className="w-5 h-5 text-blue-600" />
               <span>{companyToEdit ? 'Edit Company Profile' : 'Add New Company to Directory'}</span>
             </h3>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-7 space-y-5">
+          <form onSubmit={handleSubmit} className="p-7 space-y-5 overflow-y-auto flex-1">
             {/* Company Name */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -138,6 +144,34 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
                 value={formData.hrEmail}
                 onChange={(e) => setFormData({ ...formData, hrEmail: e.target.value })}
                 className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm font-mono"
+              />
+            </div>
+
+            {/* Email Subject */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Default Email Subject
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Candidature Spontanée : Développeur Full-Stack"
+                value={formData.emailSubject}
+                onChange={(e) => setFormData({ ...formData, emailSubject: e.target.value })}
+                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+              />
+            </div>
+
+            {/* Email Body Pitch */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Default Email Body Pitch (Optional)
+              </label>
+              <textarea
+                rows="5"
+                placeholder="Bonjour, Je vous adresse ma candidature spontanée pour un poste de Développeur Full-Stack..."
+                value={formData.emailBody}
+                onChange={(e) => setFormData({ ...formData, emailBody: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono shadow-sm"
               />
             </div>
 

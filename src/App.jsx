@@ -139,10 +139,16 @@ export default function App() {
   const handleSaveCompany = async (formData) => {
     try {
       if (companyToEdit) {
+        setCompanies((prev) =>
+          prev.map((c) => (c.id === companyToEdit.id ? { ...c, ...formData } : c))
+        );
         await updateCompany(companyToEdit.id, formData);
         showToast('Company profile updated!', 'success');
       } else {
-        await addCompany(formData);
+        const saved = await addCompany(formData);
+        if (saved && saved.id) {
+          setCompanies((prev) => [saved, ...prev.filter((c) => c.id !== saved.id)]);
+        }
         showToast('Company added to directory!', 'success');
       }
       setIsCompanyModalOpen(false);
@@ -155,12 +161,16 @@ export default function App() {
 
   const handleDeleteCompany = async (id) => {
     if (window.confirm('Are you sure you want to remove this company from directory?')) {
+      setCompanies((prev) => prev.filter((c) => c.id !== id));
       await deleteCompany(id);
       showToast('Company removed', 'info');
     }
   };
 
   const handleToggleCompanyStatus = async (id, newContactStatus) => {
+    setCompanies((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, contactStatus: newContactStatus } : c))
+    );
     await updateCompany(id, { contactStatus: newContactStatus });
     showToast(`Contact status updated to "${newContactStatus}"`, 'success');
   };

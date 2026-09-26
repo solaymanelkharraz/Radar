@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, MapPin, Globe, Mail, Send, Copy, Check, Edit2, Trash2, ExternalLink } from 'lucide-react';
+import { X, Building2, MapPin, Globe, Mail, Send, Copy, Check, Edit2, Trash2, ExternalLink, FileText } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { handleOpenGmail } from '../../utils/gmailUtils';
 
 export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete, onCopyEmail, onStatusToggle }) {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !company) return null;
 
-  const { id, companyName, sector, location, hrEmail, website, contactStatus } = company;
+  const { id, companyName, sector, location, hrEmail, website, contactStatus, emailSubject, emailBody } = company;
 
   const handleCopy = () => {
     if (!hrEmail) return;
@@ -18,28 +19,9 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const generateMailtoLink = () => {
-    if (!hrEmail) return '#';
-    const subject = "Candidature Spontanée - Développeur Full Stack";
-    const body = `Bonjour,
-
-Je vous contacte afin de vous soumettre ma candidature spontanée pour un poste de Développeur Full Stack au sein de ${companyName}.
-
-Passionné par la conception d'applications web modernes, évolutives et performantes, je serais ravi de pouvoir vous présenter mon parcours ainsi que mes compétences techniques.
-
-Vous trouverez mon CV ci-joint à cet email.
-
-Je reste à votre entière disposition pour tout échange ou entretien.
-
-Cordialement,
-[Votre Nom]`;
-
-    return `mailto:${encodeURIComponent(hrEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="fixed inset-0 z-50 flex justify-end font-sans">
         {/* Backdrop overlay */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -73,7 +55,7 @@ Cordialement,
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -99,23 +81,23 @@ Cordialement,
               </div>
             </div>
 
-            {/* HR Contact Box */}
+            {/* HR Contact & Gmail Pitching Box */}
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                HR Contact Information
+                HR Contact & Gmail Drafting
               </span>
 
               {hrEmail ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
-                    <div className="flex items-center gap-2 text-xs font-mono text-slate-800">
-                      <Mail className="w-4 h-4 text-blue-600" />
-                      <span>{hrEmail}</span>
+                    <div className="flex items-center gap-2 text-xs font-mono text-slate-800 min-w-0 truncate">
+                      <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                      <span className="truncate">{hrEmail}</span>
                     </div>
 
                     <button
                       onClick={handleCopy}
-                      className={`p-2 rounded-xl border transition-all ${
+                      className={`p-2 rounded-xl border transition-all cursor-pointer ${
                         copied
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                           : 'bg-white text-slate-500 border-slate-300 hover:text-blue-600 hover:bg-slate-50'
@@ -125,18 +107,37 @@ Cordialement,
                     </button>
                   </div>
 
-                  {/* Auto-Mailer "Send Pitch" Button */}
-                  <a
-                    href={generateMailtoLink()}
-                    className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
+                  {/* Draft in Web Gmail Button */}
+                  <button
+                    onClick={() => handleOpenGmail(hrEmail, emailSubject, emailBody, companyName)}
+                    className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
                   >
-                    <Send className="w-4 h-4 stroke-[2.5]" />
-                    <span>Auto-Mailer: Send Spontaneous Pitch</span>
-                  </a>
+                    <Mail className="w-4 h-4 stroke-[2.5]" />
+                    <span>Draft in Web Gmail ↗</span>
+                  </button>
                 </div>
               ) : (
                 <p className="text-xs text-slate-400 italic">No HR email recorded for this company.</p>
               )}
+            </div>
+
+            {/* Email Subject & Pitch Body Preview */}
+            <div className="space-y-3 p-5 rounded-2xl bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700">
+                <FileText className="w-4 h-4 text-slate-400" />
+                <span>Configured Email Subject & Pitch</span>
+              </div>
+              <div className="space-y-2">
+                <div className="text-xs font-semibold text-slate-900 bg-white p-3 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 font-normal">Subject: </span>
+                  {emailSubject || "Candidature Spontanée : Développeur Full-Stack"}
+                </div>
+                {emailBody && (
+                  <div className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200 font-mono whitespace-pre-line leading-relaxed max-h-[140px] overflow-y-auto">
+                    {emailBody}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Corporate Website Link */}

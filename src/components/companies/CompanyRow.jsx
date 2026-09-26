@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Copy, Check, MapPin, Building2, ChevronRight } from 'lucide-react';
+import { Copy, Check, MapPin, Building2, ChevronRight, Mail } from 'lucide-react';
+import { handleOpenGmail } from '../../utils/gmailUtils';
 
 export function CompanyRow({ company, onClick, onCopyEmail }) {
-  const { companyName, sector, location, hrEmail, website } = company;
+  const { companyName, sector, location, hrEmail, website, emailSubject, emailBody } = company;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e) => {
@@ -53,22 +54,35 @@ export function CompanyRow({ company, onClick, onCopyEmail }) {
         </div>
       </td>
 
-      {/* HR Email */}
+      {/* HR Email & Gmail Draft Trigger */}
       <td className="py-4 px-6 text-xs">
         {hrEmail ? (
-          <div className="flex items-center gap-2">
-            <span className="text-slate-800 font-mono text-xs truncate max-w-[180px]">{hrEmail}</span>
-            <button
-              onClick={handleCopy}
-              title="Copy HR Email to clipboard"
-              className={`p-1.5 rounded-lg border transition-all ${
-                copied
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                  : 'bg-white text-slate-400 border-slate-300 hover:text-blue-600 hover:bg-slate-50'
-              }`}
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-            </button>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="text-slate-800 font-mono text-xs truncate max-w-[160px]">{hrEmail}</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleCopy}
+                title="Copy HR Email to clipboard"
+                className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                  copied
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                    : 'bg-white text-slate-400 border-slate-300 hover:text-blue-600 hover:bg-slate-50'
+                }`}
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenGmail(hrEmail, emailSubject, emailBody, companyName);
+                }}
+                title="Draft email in Web Gmail"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-extrabold text-[11px] transition-all active:scale-95 shadow-2xs cursor-pointer"
+              >
+                <Mail className="w-3.5 h-3.5 text-blue-600 stroke-[2.5]" />
+                <span>Draft in Web Gmail</span>
+              </button>
+            </div>
           </div>
         ) : (
           <span className="text-slate-400 italic">No email</span>
