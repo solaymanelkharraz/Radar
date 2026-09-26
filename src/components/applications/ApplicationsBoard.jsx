@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailDrawer } from './ApplicationDetailDrawer';
-import { Plus, Clock, Archive, CheckCircle2, Filter } from 'lucide-react';
+import { Plus, Clock, Archive, CheckCircle2, Filter, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete, onToggleApplied, onOpenAdd }) {
@@ -13,6 +13,10 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
 
   // Selected Application for Detail Drawer
   const [selectedApp, setSelectedApp] = useState(null);
+
+  // Raw counts before search & priority filters
+  const rawPendingCount = applications.filter((app) => !app.isApplied).length;
+  const rawArchiveCount = applications.filter((app) => app.isApplied).length;
 
   // Filter applications by search query AND priority filter
   const filteredApps = applications.filter((app) => {
@@ -36,6 +40,7 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
   const archiveApps = filteredApps.filter((app) => app.isApplied);
 
   const currentTabApps = activeVaultTab === 'pending' ? pendingApps : archiveApps;
+  const isFilterActive = priorityFilter !== 'All' || !!searchQuery;
 
   return (
     <div className="p-8 space-y-8 font-sans">
@@ -60,7 +65,7 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
                   : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}
             >
-              {pendingApps.length}
+              {isFilterActive ? `${pendingApps.length} / ${rawPendingCount}` : pendingApps.length}
             </span>
           </button>
 
@@ -81,7 +86,7 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
                   : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}
             >
-              {archiveApps.length}
+              {isFilterActive ? `${archiveApps.length} / ${rawArchiveCount}` : archiveApps.length}
             </span>
           </button>
         </div>
@@ -101,6 +106,16 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
               <option value="Medium">🟡 Medium Priority</option>
               <option value="Low">🟢 Low Priority</option>
             </select>
+
+            {priorityFilter !== 'All' && (
+              <button
+                onClick={() => setPriorityFilter('All')}
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                title="Reset Priority Filter"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Quick Add Button */}
@@ -144,10 +159,10 @@ export function ApplicationsBoard({ applications, searchQuery, onEdit, onDelete,
               ) : (
                 <>
                   <Archive className="w-10 h-10 text-slate-400" />
-                  <p className="text-base font-bold text-slate-700">Archive is empty</p>
+                  <p className="text-base font-bold text-slate-700">Archive is empty or filtered</p>
                   <p className="text-xs text-slate-500 max-w-sm">
                     {priorityFilter !== 'All'
-                      ? `No ${priorityFilter} priority items in archive.`
+                      ? `No ${priorityFilter} priority items match your filter in archive.`
                       : 'Mark opportunities as applied to move them to your archive vault.'}
                   </p>
                 </>

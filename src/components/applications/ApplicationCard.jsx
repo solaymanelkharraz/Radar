@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Calendar, AlertTriangle, ChevronRight, Globe } from 'lucide-react';
+import { Building2, Calendar, AlertTriangle, ChevronRight, Globe, CheckCircle2 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { PriorityBadge } from '../ui/PriorityBadge';
 
@@ -30,12 +30,12 @@ export function ApplicationCard({ application, onClick }) {
   const deadlineInfo = calculateDeadline(deadlineDate);
   const isUrgent = deadlineInfo.isUrgent && !isApplied;
 
-  // Light Mode card styling
+  // Light Mode card styling - full 100% opacity for both active and archived cards
   const cardStyleClass = isApplied
-    ? 'bg-slate-50/80 border-slate-200 opacity-80 hover:opacity-100'
+    ? 'bg-slate-50 border-slate-200 shadow-xs hover:border-slate-300'
     : isUrgent
-    ? 'bg-amber-50/40 border-amber-300 shadow-sm hover:border-amber-400'
-    : 'bg-white border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md';
+    ? 'bg-amber-50/40 border-amber-300 shadow-xs hover:border-amber-400'
+    : 'bg-white border-slate-200 shadow-xs hover:border-blue-300 hover:shadow-md';
 
   return (
     <motion.div
@@ -50,14 +50,21 @@ export function ApplicationCard({ application, onClick }) {
         className={`group rounded-2xl p-5 border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 ${cardStyleClass}`}
       >
         <div className="space-y-3">
-          {/* Top Row: Source badge, Priority badge & Indicators */}
+          {/* Top Row: Source badge, Priority badge & Status/Urgency indicators */}
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={source}>{source || 'Spontaneous'}</Badge>
               <PriorityBadge priority={priority} />
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {isApplied && (
+                <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase tracking-wider">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  Applied
+                </span>
+              )}
+
               {responseUrl && (
                 <span
                   className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200"
