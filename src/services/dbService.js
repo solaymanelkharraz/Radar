@@ -24,20 +24,20 @@ const saveLocalData = (key, items) => {
   localStorage.setItem(key, JSON.stringify(items));
 };
 
-// Map Supabase rows to JS objects
+// Map Supabase rows to JS objects with full fallback support
 const mapAppFromSupabase = (row) => ({
   id: row.id,
-  companyName: row.company_name || row.companyName,
-  jobTitle: row.job_title || row.jobTitle,
-  source: row.source,
+  companyName: row.company_name || row.companyName || row.company || '',
+  jobTitle: row.job_title || row.jobTitle || row.title || '',
+  source: row.source || 'Spontaneous',
   priority: row.priority || 'Medium',
-  linkToApply: row.link_to_apply || row.linkToApply || '',
+  linkToApply: row.link_to_apply || row.linkToApply || row.link || '',
   responseUrl: row.response_url || row.responseUrl || '',
-  deadlineDate: row.deadline_date || row.deadlineDate,
+  deadlineDate: row.deadline_date || row.deadlineDate || '',
   isApplied: row.is_applied !== undefined ? row.is_applied : (row.isApplied ?? false),
   requirements: row.requirements || '',
   notes: row.notes || '',
-  createdAt: row.created_at || row.createdAt,
+  createdAt: row.created_at || row.createdAt || Date.now(),
 });
 
 const mapAppToSupabase = (app) => ({
@@ -89,6 +89,7 @@ export const subscribeApplications = (callback) => {
     return () => window.removeEventListener('radar_app_update', handleStorageChange);
   } else {
     const fetchApps = async () => {
+      const localApps = getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
       try {
         const { data, error } = await supabase
           .from('applications')
@@ -97,15 +98,35 @@ export const subscribeApplications = (callback) => {
 
         if (error) {
           console.warn('Network issue fetching applications from Supabase. Using local cache:', error);
-          callback(getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS));
+          callback(localApps);
         } else {
-          const parsed = (data || []).map(mapAppFromSupabase);
+          // Merge Supabase data with Local Storage cache to ensure zero data loss
+          const parsed = (data || []).map((row) => {
+            const mapped = mapAppFromSupabase(row);
+            const localMatch = localApps.find((l) => l.id === mapped.id);
+            if (localMatch) {
+              return {
+                ...localMatch,
+                ...mapped,
+                companyName: mapped.companyName || localMatch.companyName || 'Unknown Organization',
+                jobTitle: mapped.jobTitle || localMatch.jobTitle || 'Untitled Opportunity',
+                requirements: mapped.requirements || localMatch.requirements || '',
+                notes: mapped.notes || localMatch.notes || '',
+                linkToApply: mapped.linkToApply || localMatch.linkToApply || '',
+                responseUrl: mapped.responseUrl || localMatch.responseUrl || '',
+                priority: mapped.priority || localMatch.priority || 'Medium',
+                source: mapped.source || localMatch.source || 'Spontaneous',
+              };
+            }
+            return mapped;
+          });
+
           saveLocalData(STORAGE_KEYS.APPLICATIONS, parsed);
           callback(parsed);
         }
       } catch (err) {
         console.warn('Connection reset/offline. Falling back to local applications:', err);
-        callback(getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS));
+        callback(localApps);
       }
     };
 
@@ -174,7 +195,8 @@ export const addApplication = async (appData) => {
       return saveLocalApp();
     }
 
-    window.dispatchEvent(new Event('radar_app_update'));
+    // Always keep local cache synced
+    saveLocalApp();
     return mapAppFromSupabase(data[0]);
   } catch (err) {
     console.warn('Connection reset during addApplication. Saving locally:', err);
@@ -190,8 +212,10 @@ export const updateApplication = async (id, appData) => {
     window.dispatchEvent(new Event('radar_app_update'));
   };
 
+  // Always update local cache first for instant UI response and zero data loss
+  saveLocalUpdate();
+
   if (isDemoMode || !supabase) {
-    saveLocalUpdate();
     return;
   }
 
@@ -218,14 +242,10 @@ export const updateApplication = async (id, appData) => {
     }
 
     if (error) {
-      console.warn('Supabase update error. Saving locally as fallback:', error);
-      saveLocalUpdate();
-      return;
+      console.warn('Supabase update error. Retaining local updates:', error);
     }
-    window.dispatchEvent(new Event('radar_app_update'));
   } catch (err) {
-    console.warn('Connection reset during updateApplication. Saving locally:', err);
-    saveLocalUpdate();
+    console.warn('Connection reset during updateApplication. Retaining local updates:', err);
   }
 };
 
@@ -237,22 +257,19 @@ export const deleteApplication = async (id) => {
     window.dispatchEvent(new Event('radar_app_update'));
   };
 
+  saveLocalDelete();
+
   if (isDemoMode || !supabase) {
-    saveLocalDelete();
     return;
   }
 
   try {
     const { error } = await supabase.from('applications').delete().eq('id', id);
     if (error) {
-      console.warn('Supabase delete error. Deleting locally:', error);
-      saveLocalDelete();
-      return;
+      console.warn('Supabase delete error. Retaining local deletion:', error);
     }
-    window.dispatchEvent(new Event('radar_app_update'));
   } catch (err) {
-    console.warn('Connection reset during deleteApplication. Deleting locally:', err);
-    saveLocalDelete();
+    console.warn('Connection reset during deleteApplication:', err);
   }
 };
 
@@ -272,6 +289,7 @@ export const subscribeCompanies = (callback) => {
     return () => window.removeEventListener('radar_company_update', handleStorageChange);
   } else {
     const fetchCompanies = async () => {
+      const localComp = getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES);
       try {
         const { data, error } = await supabase
           .from('companies')
@@ -280,7 +298,7 @@ export const subscribeCompanies = (callback) => {
 
         if (error) {
           console.warn('Error fetching companies from Supabase. Using local cache:', error);
-          callback(getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES));
+          callback(localComp);
         } else {
           const parsed = (data || []).map(mapCompanyFromSupabase);
           saveLocalData(STORAGE_KEYS.COMPANIES, parsed);
@@ -288,7 +306,7 @@ export const subscribeCompanies = (callback) => {
         }
       } catch (err) {
         console.warn('Connection reset fetching companies. Using local cache:', err);
-        callback(getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES));
+        callback(localComp);
       }
     };
 
@@ -356,8 +374,9 @@ export const updateCompany = async (id, companyData) => {
     window.dispatchEvent(new Event('radar_company_update'));
   };
 
+  saveLocalCompanyUpdate();
+
   if (isDemoMode || !supabase) {
-    saveLocalCompanyUpdate();
     return;
   }
 
@@ -366,13 +385,9 @@ export const updateCompany = async (id, companyData) => {
     const { error } = await supabase.from('companies').update(payload).eq('id', id);
     if (error) {
       console.warn('Error updating company in Supabase. Saving locally:', error);
-      saveLocalCompanyUpdate();
-      return;
     }
-    window.dispatchEvent(new Event('radar_company_update'));
   } catch (err) {
     console.warn('Connection reset during updateCompany. Saving locally:', err);
-    saveLocalCompanyUpdate();
   }
 };
 
@@ -384,8 +399,9 @@ export const deleteCompany = async (id) => {
     window.dispatchEvent(new Event('radar_company_update'));
   };
 
+  saveLocalCompanyDelete();
+
   if (isDemoMode || !supabase) {
-    saveLocalCompanyDelete();
     return;
   }
 
@@ -393,12 +409,8 @@ export const deleteCompany = async (id) => {
     const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) {
       console.warn('Error deleting company from Supabase. Deleting locally:', error);
-      saveLocalCompanyDelete();
-      return;
     }
-    window.dispatchEvent(new Event('radar_company_update'));
   } catch (err) {
-    console.warn('Connection reset during deleteCompany. Deleting locally:', err);
-    saveLocalCompanyDelete();
+    console.warn('Connection reset during deleteCompany:', err);
   }
 };

@@ -31,7 +31,7 @@ export function ApplicationDetailDrawer({
 
   useEffect(() => {
     if (application) {
-      setResponseUrlInput(application.responseUrl || '');
+      setResponseUrlInput(application.responseUrl || application.response_url || '');
       setIsEditingResponseUrl(false);
     }
   }, [application]);
@@ -51,6 +51,11 @@ export function ApplicationDetailDrawer({
     requirements,
     notes,
   } = application;
+
+  const displayJobTitle = jobTitle || application.job_title || 'Untitled Opportunity';
+  const displayCompanyName = companyName || application.company_name || 'Organization Not Specified';
+  const displayApplyLink = linkToApply || application.link_to_apply || '';
+  const displayResponseUrl = responseUrl || application.response_url || '';
 
   // Calculate deadline urgency
   const calculateDeadline = (dateStr) => {
@@ -85,7 +90,6 @@ export function ApplicationDetailDrawer({
   };
 
   const handleMarkApplied = () => {
-    // If no response URL is set yet, open editing mode so user can set it or proceed
     onToggleApplied(id, true);
     onClose();
   };
@@ -112,7 +116,7 @@ export function ApplicationDetailDrawer({
         >
           {/* Drawer Header */}
           <div className="p-6 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <Badge variant={source}>{source || 'Spontaneous'}</Badge>
               <PriorityBadge priority={priority} />
               {isUrgent && (
@@ -134,20 +138,20 @@ export function ApplicationDetailDrawer({
           {/* Drawer Content */}
           <div className="p-7 space-y-6 flex-1">
             {/* Title & Company */}
-            <div className="space-y-2">
+            <div className="space-y-2 pb-2 border-b border-slate-100">
               <h2 className="text-2xl font-extrabold text-slate-900 leading-tight">
-                {jobTitle}
+                {displayJobTitle}
               </h2>
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
-                <Building2 className="w-4 h-4 text-slate-400" />
-                <span>{companyName}</span>
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                <Building2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                <span>{displayCompanyName}</span>
               </div>
             </div>
 
             {/* Direct Offer Apply Link Button */}
-            {linkToApply ? (
+            {displayApplyLink ? (
               <a
-                href={linkToApply.startsWith('http') ? linkToApply : `https://${linkToApply}`}
+                href={displayApplyLink.startsWith('http') ? displayApplyLink : `https://${displayApplyLink}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]"
@@ -162,7 +166,7 @@ export function ApplicationDetailDrawer({
               </div>
             )}
 
-            {/* RESPONSE / RESULTS TRACKING PORTAL (NEW!) */}
+            {/* RESPONSE / RESULTS TRACKING PORTAL */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
@@ -175,7 +179,7 @@ export function ApplicationDetailDrawer({
                     className="text-[11px] font-extrabold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-all cursor-pointer flex items-center gap-1"
                   >
                     <Edit2 className="w-3 h-3" />
-                    <span>{responseUrl ? 'Edit Link' : '+ Add Link'}</span>
+                    <span>{displayResponseUrl ? 'Edit Link' : '+ Add Link'}</span>
                   </button>
                 )}
               </div>
@@ -201,7 +205,7 @@ export function ApplicationDetailDrawer({
                     </button>
                     <button
                       onClick={() => {
-                        setResponseUrlInput(responseUrl || '');
+                        setResponseUrlInput(displayResponseUrl || '');
                         setIsEditingResponseUrl(false);
                       }}
                       className="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-600 font-bold text-xs rounded-lg transition-all cursor-pointer"
@@ -210,18 +214,18 @@ export function ApplicationDetailDrawer({
                     </button>
                   </div>
                 </div>
-              ) : responseUrl ? (
+              ) : displayResponseUrl ? (
                 <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <Globe className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                       <span className="text-xs font-semibold text-slate-800 truncate font-mono">
-                        {responseUrl}
+                        {displayResponseUrl}
                       </span>
                     </div>
                   </div>
                   <a
-                    href={responseUrl.startsWith('http') ? responseUrl : `https://${responseUrl}`}
+                    href={displayResponseUrl.startsWith('http') ? displayResponseUrl : `https://${displayResponseUrl}`}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
