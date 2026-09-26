@@ -89,15 +89,23 @@ export const subscribeApplications = (callback) => {
     return () => window.removeEventListener('radar_app_update', handleStorageChange);
   } else {
     const fetchApps = async () => {
-      const { data, error } = await supabase
-        .from('applications')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('applications')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching applications from Supabase:', error);
-      } else {
-        callback((data || []).map(mapAppFromSupabase));
+        if (error) {
+          console.warn('Network issue fetching applications from Supabase. Using local cache:', error);
+          callback(getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS));
+        } else {
+          const parsed = (data || []).map(mapAppFromSupabase);
+          saveLocalData(STORAGE_KEYS.APPLICATIONS, parsed);
+          callback(parsed);
+        }
+      } catch (err) {
+        console.warn('Connection reset/offline. Falling back to local applications:', err);
+        callback(getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS));
       }
     };
 
@@ -108,16 +116,21 @@ export const subscribeApplications = (callback) => {
     };
     window.addEventListener('radar_app_update', handleImmediateUpdate);
 
-    const channel = supabase
-      .channel('public:applications')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
-        fetchApps();
-      })
-      .subscribe();
+    let channel;
+    try {
+      channel = supabase
+        .channel('public:applications')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
+          fetchApps();
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime channel subscription unavailable');
+    }
 
     return () => {
       window.removeEventListener('radar_app_update', handleImmediateUpdate);
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }
 };
@@ -130,21 +143,25 @@ export const addApplication = async (appData) => {
     isApplied: appData.isApplied ?? false,
   };
 
-  if (isDemoMode || !supabase) {
+  const saveLocalApp = () => {
     const local = getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
-    const id = 'app-' + Date.now();
+    const id = appData.id || 'app-' + Date.now();
     const itemToSave = { id, ...newItem, createdAt: Date.now() };
     const updated = [itemToSave, ...local];
     saveLocalData(STORAGE_KEYS.APPLICATIONS, updated);
     window.dispatchEvent(new Event('radar_app_update'));
     return itemToSave;
-  } else {
+  };
+
+  if (isDemoMode || !supabase) {
+    return saveLocalApp();
+  }
+
+  try {
     const payload = mapAppToSupabase(newItem);
     let { data, error } = await supabase.from('applications').insert([payload]).select();
 
-    // Fallback: If priority or response_url columns do not exist yet in Supabase table schema
     if (error && (error.code === 'PGRST204' || error.status === 400)) {
-      console.warn('Supabase schema error. Retrying insert with sanitized payload...');
       delete payload.priority;
       delete payload.response_url;
       const retry = await supabase.from('applications').insert([payload]).select();
@@ -153,21 +170,32 @@ export const addApplication = async (appData) => {
     }
 
     if (error) {
-      console.error('Error adding application to Supabase:', error);
-      throw error;
+      console.warn('Supabase insert failed. Saving locally as fallback:', error);
+      return saveLocalApp();
     }
+
     window.dispatchEvent(new Event('radar_app_update'));
     return mapAppFromSupabase(data[0]);
+  } catch (err) {
+    console.warn('Connection reset during addApplication. Saving locally:', err);
+    return saveLocalApp();
   }
 };
 
 export const updateApplication = async (id, appData) => {
-  if (isDemoMode || !supabase) {
+  const saveLocalUpdate = () => {
     const local = getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
     const updated = local.map((item) => (item.id === id ? { ...item, ...appData } : item));
     saveLocalData(STORAGE_KEYS.APPLICATIONS, updated);
     window.dispatchEvent(new Event('radar_app_update'));
-  } else {
+  };
+
+  if (isDemoMode || !supabase) {
+    saveLocalUpdate();
+    return;
+  }
+
+  try {
     const payload = {};
     if (appData.companyName !== undefined) payload.company_name = appData.companyName;
     if (appData.jobTitle !== undefined) payload.job_title = appData.jobTitle;
@@ -182,9 +210,7 @@ export const updateApplication = async (id, appData) => {
 
     let { error } = await supabase.from('applications').update(payload).eq('id', id);
 
-    // Fallback: If column does not exist yet in Supabase table schema
     if (error && (error.code === 'PGRST204' || error.status === 400)) {
-      console.warn('Supabase schema missing columns. Retrying update with base payload...');
       delete payload.priority;
       delete payload.response_url;
       const retry = await supabase.from('applications').update(payload).eq('id', id);
@@ -192,26 +218,41 @@ export const updateApplication = async (id, appData) => {
     }
 
     if (error) {
-      console.error('Error updating application in Supabase:', error);
-      throw error;
+      console.warn('Supabase update error. Saving locally as fallback:', error);
+      saveLocalUpdate();
+      return;
     }
     window.dispatchEvent(new Event('radar_app_update'));
+  } catch (err) {
+    console.warn('Connection reset during updateApplication. Saving locally:', err);
+    saveLocalUpdate();
   }
 };
 
 export const deleteApplication = async (id) => {
-  if (isDemoMode || !supabase) {
+  const saveLocalDelete = () => {
     const local = getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
     const updated = local.filter((item) => item.id !== id);
     saveLocalData(STORAGE_KEYS.APPLICATIONS, updated);
     window.dispatchEvent(new Event('radar_app_update'));
-  } else {
+  };
+
+  if (isDemoMode || !supabase) {
+    saveLocalDelete();
+    return;
+  }
+
+  try {
     const { error } = await supabase.from('applications').delete().eq('id', id);
     if (error) {
-      console.error('Error deleting application from Supabase:', error);
-      throw error;
+      console.warn('Supabase delete error. Deleting locally:', error);
+      saveLocalDelete();
+      return;
     }
     window.dispatchEvent(new Event('radar_app_update'));
+  } catch (err) {
+    console.warn('Connection reset during deleteApplication. Deleting locally:', err);
+    saveLocalDelete();
   }
 };
 
@@ -231,15 +272,23 @@ export const subscribeCompanies = (callback) => {
     return () => window.removeEventListener('radar_company_update', handleStorageChange);
   } else {
     const fetchCompanies = async () => {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching companies from Supabase:', error);
-      } else {
-        callback((data || []).map(mapCompanyFromSupabase));
+        if (error) {
+          console.warn('Error fetching companies from Supabase. Using local cache:', error);
+          callback(getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES));
+        } else {
+          const parsed = (data || []).map(mapCompanyFromSupabase);
+          saveLocalData(STORAGE_KEYS.COMPANIES, parsed);
+          callback(parsed);
+        }
+      } catch (err) {
+        console.warn('Connection reset fetching companies. Using local cache:', err);
+        callback(getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES));
       }
     };
 
@@ -250,70 +299,106 @@ export const subscribeCompanies = (callback) => {
     };
     window.addEventListener('radar_company_update', handleImmediateUpdate);
 
-    const channel = supabase
-      .channel('public:companies')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'companies' }, () => {
-        fetchCompanies();
-      })
-      .subscribe();
+    let channel;
+    try {
+      channel = supabase
+        .channel('public:companies')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'companies' }, () => {
+          fetchCompanies();
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime channel subscription unavailable');
+    }
 
     return () => {
       window.removeEventListener('radar_company_update', handleImmediateUpdate);
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }
 };
 
 export const addCompany = async (companyData) => {
-  if (isDemoMode || !supabase) {
+  const saveLocalCompany = () => {
     const local = getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES);
-    const id = 'comp-' + Date.now();
+    const id = companyData.id || 'comp-' + Date.now();
     const newItem = { id, ...companyData, createdAt: Date.now() };
     const updated = [newItem, ...local];
     saveLocalData(STORAGE_KEYS.COMPANIES, updated);
     window.dispatchEvent(new Event('radar_company_update'));
     return newItem;
-  } else {
+  };
+
+  if (isDemoMode || !supabase) {
+    return saveLocalCompany();
+  }
+
+  try {
     const payload = mapCompanyToSupabase(companyData);
     const { data, error } = await supabase.from('companies').insert([payload]).select();
     if (error) {
-      console.error('Error adding company to Supabase:', error);
-      throw error;
+      console.warn('Error adding company to Supabase. Saving locally:', error);
+      return saveLocalCompany();
     }
     window.dispatchEvent(new Event('radar_company_update'));
     return mapCompanyFromSupabase(data[0]);
+  } catch (err) {
+    console.warn('Connection reset during addCompany. Saving locally:', err);
+    return saveLocalCompany();
   }
 };
 
 export const updateCompany = async (id, companyData) => {
-  if (isDemoMode || !supabase) {
+  const saveLocalCompanyUpdate = () => {
     const local = getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES);
     const updated = local.map((item) => (item.id === id ? { ...item, ...companyData } : item));
     saveLocalData(STORAGE_KEYS.COMPANIES, updated);
     window.dispatchEvent(new Event('radar_company_update'));
-  } else {
+  };
+
+  if (isDemoMode || !supabase) {
+    saveLocalCompanyUpdate();
+    return;
+  }
+
+  try {
     const payload = mapCompanyToSupabase(companyData);
     const { error } = await supabase.from('companies').update(payload).eq('id', id);
     if (error) {
-      console.error('Error updating company in Supabase:', error);
-      throw error;
+      console.warn('Error updating company in Supabase. Saving locally:', error);
+      saveLocalCompanyUpdate();
+      return;
     }
     window.dispatchEvent(new Event('radar_company_update'));
+  } catch (err) {
+    console.warn('Connection reset during updateCompany. Saving locally:', err);
+    saveLocalCompanyUpdate();
   }
 };
 
 export const deleteCompany = async (id) => {
-  if (isDemoMode || !supabase) {
+  const saveLocalCompanyDelete = () => {
     const local = getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES);
     const updated = local.filter((item) => item.id !== id);
     saveLocalData(STORAGE_KEYS.COMPANIES, updated);
     window.dispatchEvent(new Event('radar_company_update'));
-  } else {
+  };
+
+  if (isDemoMode || !supabase) {
+    saveLocalCompanyDelete();
+    return;
+  }
+
+  try {
     const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) {
-      console.error('Error deleting company from Supabase:', error);
-      throw error;
+      console.warn('Error deleting company from Supabase. Deleting locally:', error);
+      saveLocalCompanyDelete();
+      return;
     }
     window.dispatchEvent(new Event('radar_company_update'));
+  } catch (err) {
+    console.warn('Connection reset during deleteCompany. Deleting locally:', err);
+    saveLocalCompanyDelete();
   }
 };
