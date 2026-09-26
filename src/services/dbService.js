@@ -32,6 +32,7 @@ const mapAppFromSupabase = (row) => ({
   source: row.source,
   priority: row.priority || 'Medium',
   linkToApply: row.link_to_apply || row.linkToApply || '',
+  responseUrl: row.response_url || row.responseUrl || '',
   deadlineDate: row.deadline_date || row.deadlineDate,
   isApplied: row.is_applied !== undefined ? row.is_applied : (row.isApplied ?? false),
   requirements: row.requirements || '',
@@ -45,6 +46,7 @@ const mapAppToSupabase = (app) => ({
   source: app.source,
   priority: app.priority || 'Medium',
   link_to_apply: app.linkToApply || null,
+  response_url: app.responseUrl || null,
   deadline_date: app.deadlineDate || null,
   is_applied: app.isApplied ?? false,
   requirements: app.requirements || null,
@@ -124,6 +126,7 @@ export const addApplication = async (appData) => {
   const newItem = {
     ...appData,
     priority: appData.priority || 'Medium',
+    responseUrl: appData.responseUrl || '',
     isApplied: appData.isApplied ?? false,
   };
 
@@ -139,10 +142,11 @@ export const addApplication = async (appData) => {
     const payload = mapAppToSupabase(newItem);
     let { data, error } = await supabase.from('applications').insert([payload]).select();
 
-    // Fallback: If priority column does not exist yet in Supabase table schema
-    if (error && (error.code === 'PGRST204' || error.status === 400 || (error.message && error.message.includes('priority')))) {
-      console.warn('Supabase missing priority column. Retrying insert without priority field...');
+    // Fallback: If priority or response_url columns do not exist yet in Supabase table schema
+    if (error && (error.code === 'PGRST204' || error.status === 400)) {
+      console.warn('Supabase schema error. Retrying insert with sanitized payload...');
       delete payload.priority;
+      delete payload.response_url;
       const retry = await supabase.from('applications').insert([payload]).select();
       data = retry.data;
       error = retry.error;
@@ -170,6 +174,7 @@ export const updateApplication = async (id, appData) => {
     if (appData.source !== undefined) payload.source = appData.source;
     if (appData.priority !== undefined) payload.priority = appData.priority;
     if (appData.linkToApply !== undefined) payload.link_to_apply = appData.linkToApply || null;
+    if (appData.responseUrl !== undefined) payload.response_url = appData.responseUrl || null;
     if (appData.deadlineDate !== undefined) payload.deadline_date = appData.deadlineDate || null;
     if (appData.isApplied !== undefined) payload.is_applied = appData.isApplied;
     if (appData.requirements !== undefined) payload.requirements = appData.requirements || null;
@@ -177,10 +182,11 @@ export const updateApplication = async (id, appData) => {
 
     let { error } = await supabase.from('applications').update(payload).eq('id', id);
 
-    // Fallback: If priority column does not exist yet in Supabase table schema
-    if (error && (error.code === 'PGRST204' || error.status === 400 || (error.message && error.message.includes('priority')))) {
-      console.warn('Supabase missing priority column. Retrying update without priority field...');
+    // Fallback: If column does not exist yet in Supabase table schema
+    if (error && (error.code === 'PGRST204' || error.status === 400)) {
+      console.warn('Supabase schema missing columns. Retrying update with base payload...');
       delete payload.priority;
+      delete payload.response_url;
       const retry = await supabase.from('applications').update(payload).eq('id', id);
       error = retry.error;
     }

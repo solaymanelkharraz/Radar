@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Calendar, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Building2, Calendar, AlertTriangle, ChevronRight, Globe } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { PriorityBadge } from '../ui/PriorityBadge';
 
 export function ApplicationCard({ application, onClick }) {
-  const { companyName, jobTitle, source, priority = 'Medium', deadlineDate, isApplied } = application;
+  const { companyName, jobTitle, source, priority = 'Medium', deadlineDate, isApplied, responseUrl } = application;
 
   // Calculate deadline urgency
   const calculateDeadline = (dateStr) => {
@@ -50,19 +50,31 @@ export function ApplicationCard({ application, onClick }) {
         className={`group rounded-2xl p-5 border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 ${cardStyleClass}`}
       >
         <div className="space-y-3">
-          {/* Top Row: Source badge, Priority badge & Urgency indicator */}
+          {/* Top Row: Source badge, Priority badge & Indicators */}
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={source}>{source || 'Spontaneous'}</Badge>
               <PriorityBadge priority={priority} />
             </div>
 
-            {isUrgent && (
-              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 uppercase tracking-wider">
-                <AlertTriangle className="w-3 h-3 text-amber-600" />
-                Urgent
-              </span>
-            )}
+            <div className="flex items-center gap-1.5">
+              {responseUrl && (
+                <span
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  title="Response / Results tracking URL attached"
+                >
+                  <Globe className="w-3 h-3 text-emerald-600" />
+                  <span>Results Link</span>
+                </span>
+              )}
+
+              {isUrgent && (
+                <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300 uppercase tracking-wider">
+                  <AlertTriangle className="w-3 h-3 text-amber-600" />
+                  Urgent
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Job Title */}

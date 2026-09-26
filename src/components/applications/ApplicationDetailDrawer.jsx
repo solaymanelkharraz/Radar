@@ -1,13 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Calendar, CheckCircle, RotateCcw, Edit2, Trash2, FileText, Building2, AlertTriangle, Link2 } from 'lucide-react';
+import {
+  X,
+  ExternalLink,
+  Calendar,
+  CheckCircle,
+  RotateCcw,
+  Edit2,
+  Trash2,
+  FileText,
+  Building2,
+  AlertTriangle,
+  Link2,
+  Globe,
+  ArrowUpRight,
+} from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { PriorityBadge } from '../ui/PriorityBadge';
 
-export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, onDelete, onToggleApplied }) {
+export function ApplicationDetailDrawer({
+  isOpen,
+  onClose,
+  application,
+  onEdit,
+  onDelete,
+  onToggleApplied,
+}) {
+  const [isEditingResponseUrl, setIsEditingResponseUrl] = useState(false);
+  const [responseUrlInput, setResponseUrlInput] = useState('');
+
+  useEffect(() => {
+    if (application) {
+      setResponseUrlInput(application.responseUrl || '');
+      setIsEditingResponseUrl(false);
+    }
+  }, [application]);
+
   if (!isOpen || !application) return null;
 
-  const { id, companyName, jobTitle, source, priority = 'Medium', linkToApply, deadlineDate, isApplied, requirements, notes } = application;
+  const {
+    id,
+    companyName,
+    jobTitle,
+    source,
+    priority = 'Medium',
+    linkToApply,
+    responseUrl,
+    deadlineDate,
+    isApplied,
+    requirements,
+    notes,
+  } = application;
 
   // Calculate deadline urgency
   const calculateDeadline = (dateStr) => {
@@ -32,9 +75,24 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
   const deadlineInfo = calculateDeadline(deadlineDate);
   const isUrgent = deadlineInfo.isUrgent && !isApplied;
 
+  const handleSaveResponseUrl = () => {
+    const trimmed = responseUrlInput.trim();
+    onEdit({
+      ...application,
+      responseUrl: trimmed,
+    });
+    setIsEditingResponseUrl(false);
+  };
+
+  const handleMarkApplied = () => {
+    // If no response URL is set yet, open editing mode so user can set it or proceed
+    onToggleApplied(id, true);
+    onClose();
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex justify-end">
+      <div className="fixed inset-0 z-50 flex justify-end font-sans">
         {/* Backdrop overlay */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -67,7 +125,7 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -92,7 +150,7 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
                 href={linkToApply.startsWith('http') ? linkToApply : `https://${linkToApply}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
+                className="w-full py-3 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98]"
               >
                 <Link2 className="w-4 h-4 stroke-[2.5]" />
                 <span>Open Direct Offer Link</span>
@@ -103,6 +161,87 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
                 No direct apply link specified.
               </div>
             )}
+
+            {/* RESPONSE / RESULTS TRACKING PORTAL (NEW!) */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
+                  <Globe className="w-4 h-4 text-emerald-600" />
+                  <span>Response & Candidate Results Portal</span>
+                </div>
+                {!isEditingResponseUrl && (
+                  <button
+                    onClick={() => setIsEditingResponseUrl(true)}
+                    className="text-[11px] font-extrabold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    <span>{responseUrl ? 'Edit Link' : '+ Add Link'}</span>
+                  </button>
+                )}
+              </div>
+
+              {isEditingResponseUrl ? (
+                <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-300 space-y-2.5">
+                  <label className="block text-[11px] font-bold text-slate-700">
+                    Paste URL where results, exam schedules, or candidate updates will be posted:
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="https://www.emploi-public.ma/results or candidate portal..."
+                      value={responseUrlInput}
+                      onChange={(e) => setResponseUrlInput(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                    <button
+                      onClick={handleSaveResponseUrl}
+                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-lg transition-all shadow-xs cursor-pointer"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setResponseUrlInput(responseUrl || '');
+                        setIsEditingResponseUrl(false);
+                      }}
+                      className="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-600 font-bold text-xs rounded-lg transition-all cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : responseUrl ? (
+                <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Globe className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-slate-800 truncate font-mono">
+                        {responseUrl}
+                      </span>
+                    </div>
+                  </div>
+                  <a
+                    href={responseUrl.startsWith('http') ? responseUrl : `https://${responseUrl}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                  >
+                    <span>Open Response & Results Portal</span>
+                    <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+                  </a>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                  <span>No response tracking link set for exam results or updates.</span>
+                  <button
+                    onClick={() => setIsEditingResponseUrl(true)}
+                    className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200 transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>+ Add Link</span>
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Deadline & Urgency Box */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
@@ -145,11 +284,8 @@ export function ApplicationDetailDrawer({ isOpen, onClose, application, onEdit, 
             {/* Mark as Applied Action Button */}
             {!isApplied ? (
               <button
-                onClick={() => {
-                  onToggleApplied(id, true);
-                  onClose();
-                }}
-                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+                onClick={handleMarkApplied}
+                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
               >
                 <CheckCircle className="w-4 h-4 stroke-[2.5]" />
                 <span>Mark as Applied & Archive</span>

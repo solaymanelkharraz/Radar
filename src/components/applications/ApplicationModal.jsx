@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Briefcase, Link2, FileText } from 'lucide-react';
+import { X, Save, Briefcase, Link2, FileText, Globe, ArrowUpRight } from 'lucide-react';
 
 export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, companiesList = [] }) {
   const sources = [
@@ -32,6 +32,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
     status: 'To Apply',
     priority: 'Medium',
     linkToApply: '',
+    responseUrl: '',
     deadlineDate: '',
     requirements: '',
     notes: '',
@@ -46,6 +47,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
         status: applicationToEdit.isApplied ? 'Applied' : 'To Apply',
         priority: applicationToEdit.priority || 'Medium',
         linkToApply: applicationToEdit.linkToApply || '',
+        responseUrl: applicationToEdit.responseUrl || '',
         deadlineDate: applicationToEdit.deadlineDate || '',
         requirements: applicationToEdit.requirements || '',
         notes: applicationToEdit.notes || '',
@@ -58,6 +60,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
         status: 'To Apply',
         priority: 'Medium',
         linkToApply: '',
+        responseUrl: '',
         deadlineDate: new Date().toISOString().split('T')[0],
         requirements: '',
         notes: '',
@@ -78,6 +81,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
       priority: formData.priority,
       isApplied: formData.status === 'Applied',
       linkToApply: formData.linkToApply.trim(),
+      responseUrl: formData.responseUrl.trim(),
       deadlineDate: formData.deadlineDate,
       requirements: formData.requirements.trim(),
       notes: formData.notes.trim(),
@@ -91,10 +95,10 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden"
+          className="w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80">
+          <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-slate-50/80 flex-shrink-0">
             <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-3">
               <Briefcase className="w-5 h-5 text-blue-600" />
               <span>{applicationToEdit ? 'Edit Opportunity' : 'Add Opportunity to Vault'}</span>
@@ -107,8 +111,8 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
             </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-7 space-y-5">
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="p-7 space-y-5 overflow-y-auto flex-1">
             {/* Job Title */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -215,7 +219,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
               </div>
             </div>
 
-            {/* Link to Apply */}
+            {/* Direct Offer Link */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Direct Offer Link (URL)
@@ -230,6 +234,32 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
                   className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs font-mono"
                 />
               </div>
+            </div>
+
+            {/* Response / Status Tracking URL (NEW!) */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Globe className="w-4 h-4 text-emerald-600" />
+                  <span>Response / Results Portal URL (Optional)</span>
+                </div>
+                <span className="text-[10px] text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  Status Tracking
+                </span>
+              </label>
+              <div className="relative">
+                <ArrowUpRight className="w-4 h-4 text-emerald-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="e.g. https://www.emploi-public.ma/fr/resultats, https://careers.company.com/my-applications..."
+                  value={formData.responseUrl}
+                  onChange={(e) => setFormData({ ...formData, responseUrl: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2.5 bg-emerald-50/40 border border-emerald-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-xs font-mono"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 font-normal">
+                URL where the company or government agency will post exam results, candidate shortlists, or interview calls.
+              </p>
             </div>
 
             {/* Required Documents & Criteria (Optional) */}
@@ -262,7 +292,7 @@ export function ApplicationModal({ isOpen, onClose, onSave, applicationToEdit, c
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-5 border-t border-slate-200 flex items-center justify-end gap-3">
+            <div className="pt-5 border-t border-slate-200 flex items-center justify-end gap-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={onClose}
