@@ -92,8 +92,11 @@ export function CompanyRow({ company, onClick, onCopyEmail, onStatusToggle }) {
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenGmail(hrEmail, emailSubject, emailBody, companyName);
+                  if (onStatusToggle && contactStatus !== 'CV Sent') {
+                    onStatusToggle(id, 'CV Sent');
+                  }
                 }}
-                title="Draft email in Web Gmail"
+                title="Draft email in Web Gmail and mark as CV Sent"
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-extrabold text-[11px] transition-all active:scale-95 shadow-2xs cursor-pointer"
               >
                 <Mail className="w-3.5 h-3.5 text-blue-600 stroke-[2.5]" />

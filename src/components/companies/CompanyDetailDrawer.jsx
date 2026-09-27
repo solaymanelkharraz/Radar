@@ -109,7 +109,12 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
 
                   {/* Draft in Web Gmail Button */}
                   <button
-                    onClick={() => handleOpenGmail(hrEmail, emailSubject, emailBody, companyName)}
+                    onClick={() => {
+                      handleOpenGmail(hrEmail, emailSubject, emailBody, companyName);
+                      if (onStatusToggle && contactStatus !== 'CV Sent') {
+                        onStatusToggle(id, 'CV Sent');
+                      }
+                    }}
                     className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Mail className="w-4 h-4 stroke-[2.5]" />
