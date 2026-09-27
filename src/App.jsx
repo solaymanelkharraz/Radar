@@ -7,6 +7,7 @@ import { CompanyDirectory } from './components/companies/CompanyDirectory';
 import { CompanyModal } from './components/companies/CompanyModal';
 import { SourcingCategoryView } from './components/sourcing/SourcingCategoryView';
 import { DailyRoutePage } from './components/sourcing/DailyRoutePage';
+import { SearchLibraryPage } from './components/sourcing/SearchLibraryPage';
 import { Toast } from './components/ui/Toast';
 import {
   subscribeApplications,
@@ -259,6 +260,19 @@ export default function App() {
                   onStatusToggle={handleToggleCompanyStatus}
                   onOpenAdd={handleOpenAddCompany}
                 />
+              </motion.div>
+            )}
+
+            {/* 4. Search Library (Hunting Ground) */}
+            {activeView === 'search-library' && (
+              <motion.div
+                key="search-library"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <SearchLibraryPage searchQuery={searchQuery} />
               </motion.div>
             )}
 

@@ -44,6 +44,15 @@ export function Header({
       };
     }
 
+    if (activeView === 'search-library') {
+      return {
+        title: 'Search Library (Hunting Ground)',
+        desc: 'Command center for sourcing local Tangier tech companies, agencies, and dev shops.',
+        searchPlaceholder: 'Filter search queries & keywords...',
+        icon: Search,
+      };
+    }
+
     const sourcingCat = SOURCING_CATEGORIES[activeView];
     if (sourcingCat) {
       return {

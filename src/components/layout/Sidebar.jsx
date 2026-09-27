@@ -13,6 +13,7 @@ import {
   Plus,
   Radar as RadarIcon,
   CheckSquare,
+  Search,
 } from 'lucide-react';
 import { isDemoMode } from '../../config/supabaseClient';
 
@@ -179,6 +180,28 @@ export function Sidebar({
               }`}
             >
               {companiesCount}
+            </span>
+          </button>
+
+          {/* 4. Search Library (Hunting Ground) */}
+          <button
+            onClick={() => setActiveView('search-library')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              activeView === 'search-library'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Search
+                className={`w-4 h-4 ${
+                  activeView === 'search-library' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
+              <span>Search Library</span>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+              Hub
             </span>
           </button>
 
