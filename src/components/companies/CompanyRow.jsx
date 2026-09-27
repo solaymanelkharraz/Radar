@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Copy, Check, MapPin, Building2, ChevronRight, Mail } from 'lucide-react';
+import { Badge } from '../ui/Badge';
 import { handleOpenGmail } from '../../utils/gmailUtils';
 
-export function CompanyRow({ company, onClick, onCopyEmail }) {
-  const { companyName, sector, location, hrEmail, website, emailSubject, emailBody } = company;
+export function CompanyRow({ company, onClick, onCopyEmail, onStatusToggle }) {
+  const { id, companyName, sector, location, hrEmail, website, contactStatus, emailSubject, emailBody } = company;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e) => {
@@ -52,6 +53,22 @@ export function CompanyRow({ company, onClick, onCopyEmail }) {
           <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
           <span>{location || 'Morocco'}</span>
         </div>
+      </td>
+
+      {/* Email Contact Status (1-click toggle) */}
+      <td className="py-4 px-6 text-xs">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onStatusToggle) {
+              onStatusToggle(id, contactStatus === 'CV Sent' ? 'Not Contacted' : 'CV Sent');
+            }
+          }}
+          title="Click to toggle status (CV Sent <-> Not Contacted)"
+          className="cursor-pointer focus:outline-none transition-transform active:scale-95"
+        >
+          <Badge variant={contactStatus}>{contactStatus === 'CV Sent' ? '📩 CV Sent' : '⏳ Not Contacted'}</Badge>
+        </button>
       </td>
 
       {/* HR Email & Gmail Draft Trigger */}
