@@ -104,14 +104,19 @@ export const subscribeApplications = (callback) => {
           console.warn('Network issue fetching applications from Supabase. Using local cache:', error);
           callback(localApps);
         } else {
-          // Merge Supabase data with Local Storage cache to ensure zero data loss
+          // Merge Supabase data with Local Storage cache to ensure zero data loss and prevent duplicates
           const parsedFromSupabase = (data || []).map((row) => {
             const mapped = mapAppFromSupabase(row);
-            const localMatch = localApps.find((l) => l.id === mapped.id);
+            const localMatch = localApps.find((l) =>
+              l.id === mapped.id ||
+              (l.jobTitle && mapped.jobTitle && l.jobTitle.trim().toLowerCase() === mapped.jobTitle.trim().toLowerCase() &&
+               l.companyName && mapped.companyName && l.companyName.trim().toLowerCase() === mapped.companyName.trim().toLowerCase())
+            );
             if (localMatch) {
               return {
                 ...mapped,
                 ...localMatch,
+                id: mapped.id || localMatch.id,
                 companyName: mapped.companyName || localMatch.companyName || 'Unknown Organization',
                 jobTitle: mapped.jobTitle || localMatch.jobTitle || 'Untitled Opportunity',
                 requirements: mapped.requirements || localMatch.requirements || '',
@@ -126,9 +131,15 @@ export const subscribeApplications = (callback) => {
             return mapped;
           });
 
-          // Also preserve any local-only applications that have not hit Supabase yet
+          // Also preserve any local-only applications that have not hit Supabase yet and filter duplicates
           const localOnly = localApps.filter(
-            (localItem) => !parsedFromSupabase.some((p) => p.id === localItem.id)
+            (localItem) =>
+              !parsedFromSupabase.some(
+                (p) =>
+                  p.id === localItem.id ||
+                  (p.jobTitle && localItem.jobTitle && p.jobTitle.trim().toLowerCase() === localItem.jobTitle.trim().toLowerCase() &&
+                   p.companyName && localItem.companyName && p.companyName.trim().toLowerCase() === localItem.companyName.trim().toLowerCase())
+              )
           );
 
           const parsed = [...localOnly, ...parsedFromSupabase];
@@ -176,11 +187,21 @@ export const addApplication = async (appData) => {
     isApplied: appData.isApplied ?? false,
   };
 
-  const saveLocalApp = () => {
+  const saveLocalApp = (assignedId) => {
     const local = getLocalData(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
-    const id = appData.id || 'app-' + Date.now();
+    const id = assignedId || appData.id || 'app-' + Date.now();
     const itemToSave = { id, ...newItem, createdAt: Date.now() };
-    const updated = [itemToSave, ...local];
+    const updated = [
+      itemToSave,
+      ...local.filter(
+        (item) =>
+          item.id !== id &&
+          !(
+            item.jobTitle?.trim().toLowerCase() === newItem.jobTitle?.trim().toLowerCase() &&
+            item.companyName?.trim().toLowerCase() === newItem.companyName?.trim().toLowerCase()
+          )
+      ),
+    ];
     saveLocalData(STORAGE_KEYS.APPLICATIONS, updated);
     window.dispatchEvent(new Event('radar_app_update'));
     return itemToSave;
@@ -207,9 +228,9 @@ export const addApplication = async (appData) => {
       return saveLocalApp();
     }
 
-    // Always keep local cache synced
-    saveLocalApp();
-    return mapAppFromSupabase(data[0]);
+    const createdApp = mapAppFromSupabase(data[0]);
+    saveLocalApp(createdApp.id);
+    return createdApp;
   } catch (err) {
     console.warn('Connection reset during addApplication. Saving locally:', err);
     return saveLocalApp();
@@ -314,11 +335,16 @@ export const subscribeCompanies = (callback) => {
         } else {
           const parsedFromSupabase = (data || []).map((row) => {
             const mapped = mapCompanyFromSupabase(row);
-            const localMatch = localComp.find((l) => l.id === mapped.id);
+            const localMatch = localComp.find(
+              (l) =>
+                l.id === mapped.id ||
+                (l.companyName && mapped.companyName && l.companyName.trim().toLowerCase() === mapped.companyName.trim().toLowerCase())
+            );
             if (localMatch) {
               return {
                 ...mapped,
                 ...localMatch,
+                id: mapped.id || localMatch.id,
                 companyName: mapped.companyName || localMatch.companyName,
                 sector: mapped.sector || localMatch.sector,
                 location: mapped.location || localMatch.location,
@@ -333,7 +359,12 @@ export const subscribeCompanies = (callback) => {
           });
 
           const localOnly = localComp.filter(
-            (localItem) => !parsedFromSupabase.some((p) => p.id === localItem.id)
+            (localItem) =>
+              !parsedFromSupabase.some(
+                (p) =>
+                  p.id === localItem.id ||
+                  (p.companyName && localItem.companyName && p.companyName.trim().toLowerCase() === localItem.companyName.trim().toLowerCase())
+              )
           );
 
           const parsed = [...localOnly, ...parsedFromSupabase];
@@ -379,11 +410,18 @@ export const addCompany = async (companyData) => {
     emailBody: companyData.emailBody || "",
   };
 
-  const saveLocalCompany = () => {
+  const saveLocalCompany = (assignedId) => {
     const local = getLocalData(STORAGE_KEYS.COMPANIES, INITIAL_COMPANIES);
-    const id = companyData.id || 'comp-' + Date.now();
+    const id = assignedId || companyData.id || 'comp-' + Date.now();
     const itemToSave = { id, ...newItem, createdAt: Date.now() };
-    const updated = [itemToSave, ...local];
+    const updated = [
+      itemToSave,
+      ...local.filter(
+        (c) =>
+          c.id !== id &&
+          c.companyName?.trim().toLowerCase() !== newItem.companyName?.trim().toLowerCase()
+      ),
+    ];
     saveLocalData(STORAGE_KEYS.COMPANIES, updated);
     window.dispatchEvent(new Event('radar_company_update'));
     return itemToSave;
@@ -409,8 +447,9 @@ export const addCompany = async (companyData) => {
       console.warn('Error adding company to Supabase. Saving locally:', error);
       return saveLocalCompany();
     }
-    saveLocalCompany();
-    return mapCompanyFromSupabase(data[0]);
+    const createdCompany = mapCompanyFromSupabase(data[0]);
+    saveLocalCompany(createdCompany.id);
+    return createdCompany;
   } catch (err) {
     console.warn('Connection reset during addCompany. Saving locally:', err);
     return saveLocalCompany();

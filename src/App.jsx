@@ -148,7 +148,14 @@ export default function App() {
       } else {
         const saved = await addCompany(formData);
         if (saved && saved.id) {
-          setCompanies((prev) => [saved, ...prev.filter((c) => c.id !== saved.id)]);
+          setCompanies((prev) => [
+            saved,
+            ...prev.filter(
+              (c) =>
+                c.id !== saved.id &&
+                c.companyName?.trim().toLowerCase() !== saved.companyName?.trim().toLowerCase()
+            ),
+          ]);
         }
         showToast('Company added to directory!', 'success');
       }
