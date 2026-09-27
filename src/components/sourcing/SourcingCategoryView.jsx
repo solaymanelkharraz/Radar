@@ -189,6 +189,14 @@ export const SOURCING_CATEGORIES = {
         badge: 'National Agency',
         badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
       },
+      {
+        name: 'Emploi.ma',
+        url: 'https://www.emploi.ma',
+        category: 'Moroccan Job Portal',
+        desc: 'Leading Moroccan job board for public sector notices, IT offers, and corporate hiring.',
+        badge: 'Morocco Portal',
+        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      },
     ],
   },
   'sourcing-remote': {
