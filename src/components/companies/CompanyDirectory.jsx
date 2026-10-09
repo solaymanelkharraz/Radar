@@ -26,7 +26,9 @@ export function CompanyDirectory({
   // Pipeline status counts
   const relanceDueCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'RELANCE_DUE').length;
   const programmedCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'PROGRAMME').length;
+  const email1SentCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'EMAIL_1_SENT').length;
   const relanceSentCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'RELANCE_SENT').length;
+  const aContacterCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'A_CONTACTER').length;
 
   // Filter companies by search query, sector & pipeline status
   const filteredCompanies = companies.filter((c) => {
@@ -40,17 +42,7 @@ export function CompanyDirectory({
       (c.phone && c.phone.includes(searchQuery));
 
     const matchesSector = sectorFilter === 'ALL' || c.sector === sectorFilter;
-
-    let matchesStatus = true;
-    if (statusFilter === 'RELANCE_DUE') {
-      matchesStatus = pipeline.rawKey === 'RELANCE_DUE';
-    } else if (statusFilter === 'PROGRAMME') {
-      matchesStatus = pipeline.rawKey === 'PROGRAMME';
-    } else if (statusFilter === 'RELANCE_SENT') {
-      matchesStatus = pipeline.rawKey === 'RELANCE_SENT';
-    } else if (statusFilter === 'A_CONTACTER') {
-      matchesStatus = pipeline.rawKey === 'A_CONTACTER';
-    }
+    const matchesStatus = statusFilter === 'ALL' || pipeline.rawKey === statusFilter;
 
     return matchesSearch && matchesSector && matchesStatus;
   });
@@ -90,10 +82,11 @@ export function CompanyDirectory({
               className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer"
             >
               <option value="ALL">All Pipeline Statuses ({companies.length})</option>
-              <option value="RELANCE_DUE">🚨 Relance Due (Mardi) ({relanceDueCount})</option>
-              <option value="PROGRAMME">📅 Programmé (Mardi 09:30) ({programmedCount})</option>
+              <option value="RELANCE_DUE">🚨 Relance Due ({relanceDueCount})</option>
+              <option value="PROGRAMME">📅 Programmé ({programmedCount})</option>
+              <option value="EMAIL_1_SENT">✉️ E-mail 1 Envoyé ({email1SentCount})</option>
               <option value="RELANCE_SENT">✅ Relance Envoyée ({relanceSentCount})</option>
-              <option value="A_CONTACTER">⏳ À Contacter</option>
+              <option value="A_CONTACTER">⏳ À Contacter ({aContacterCount})</option>
             </select>
 
             {statusFilter !== 'ALL' && (
@@ -106,17 +99,6 @@ export function CompanyDirectory({
               </button>
             )}
           </div>
-
-          {onResetAllCompanyStatuses && (
-            <button
-              onClick={onResetAllCompanyStatuses}
-              title="Reset all company statuses back to 'À Contacter' (Not Contacted)"
-              className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-              <span>Reset All to 'À Contacter'</span>
-            </button>
-          )}
 
           <button
             onClick={onOpenAdd}
