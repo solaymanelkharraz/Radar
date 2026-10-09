@@ -13,6 +13,7 @@ export function CompanyDirectory({
   onStatusToggle,
   onDraftGmail,
   onToggleRelanceSent,
+  onResetAllCompanyStatuses,
   onOpenAdd,
 }) {
   const [sectorFilter, setSectorFilter] = useState('ALL');
@@ -105,6 +106,17 @@ export function CompanyDirectory({
               </button>
             )}
           </div>
+
+          {onResetAllCompanyStatuses && (
+            <button
+              onClick={onResetAllCompanyStatuses}
+              title="Reset all company statuses back to 'À Contacter' (Not Contacted)"
+              className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+              <span>Reset All to 'À Contacter'</span>
+            </button>
+          )}
 
           <button
             onClick={onOpenAdd}

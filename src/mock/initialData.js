@@ -65,7 +65,9 @@ export const INITIAL_COMPANIES = [
     location: "Tanger Free Zone (TFZ)",
     hrEmail: "recrutement.tanger@renault.com",
     website: "https://www.renault.ma",
-    contactStatus: "CV Sent",
+    contactStatus: "Not Contacted",
+    scheduledFor: null,
+    relanceSent: false,
     createdAt: Date.now() - 100000
   },
   {
@@ -75,7 +77,9 @@ export const INITIAL_COMPANIES = [
     location: "Tanger Ville / Nearshore",
     hrEmail: "jobs.morocco@capgemini.com",
     website: "https://www.capgemini.com",
-    contactStatus: "CV Sent",
+    contactStatus: "Not Contacted",
+    scheduledFor: null,
+    relanceSent: false,
     createdAt: Date.now() - 200000
   },
   {
@@ -86,6 +90,8 @@ export const INITIAL_COMPANIES = [
     hrEmail: "hr.tangermed@apmterminals.com",
     website: "https://www.apmterminals.com",
     contactStatus: "Not Contacted",
+    scheduledFor: null,
+    relanceSent: false,
     createdAt: Date.now() - 300000
   },
   {
@@ -96,6 +102,8 @@ export const INITIAL_COMPANIES = [
     hrEmail: "recrutement@tanger-med.ma",
     website: "https://www.tangermed.ma",
     contactStatus: "Not Contacted",
+    scheduledFor: null,
+    relanceSent: false,
     createdAt: Date.now() - 400000
   }
 ];

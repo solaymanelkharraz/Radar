@@ -210,6 +210,27 @@ export default function App() {
     );
   };
 
+  const handleResetAllCompanyStatuses = async () => {
+    if (window.confirm('Reset all companies back to "À Contacter" (Not Contacted)?')) {
+      setCompanies((prev) =>
+        prev.map((c) => ({
+          ...c,
+          contactStatus: 'Not Contacted',
+          scheduledFor: null,
+          relanceSent: false,
+        }))
+      );
+      for (const comp of companies) {
+        await updateCompany(comp.id, {
+          contactStatus: 'Not Contacted',
+          scheduledFor: null,
+          relanceSent: false,
+        });
+      }
+      showToast('All companies reset to "À Contacter"', 'info');
+    }
+  };
+
   const handleCopyEmailToast = (email) => {
     showToast(`Copied ${email} to clipboard!`, 'info');
   };
@@ -293,6 +314,7 @@ export default function App() {
                   onCopyEmail={handleCopyEmailToast}
                   onDraftGmail={handleDraftGmailAndSchedule}
                   onToggleRelanceSent={handleToggleRelanceSent}
+                  onResetAllCompanyStatuses={handleResetAllCompanyStatuses}
                   onStatusToggle={handleToggleCompanyStatus}
                   onOpenAdd={handleOpenAddCompany}
                 />
