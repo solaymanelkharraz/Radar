@@ -22,7 +22,7 @@ export function DailyRoutePage({ onNavigateCategory }) {
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
       borderColor: 'border-amber-200',
-      badge: 'Step 6 & 7',
+      badge: 'Step 2 & 5',
     },
     {
       id: 'sourcing-government',
@@ -32,7 +32,7 @@ export function DailyRoutePage({ onNavigateCategory }) {
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
       borderColor: 'border-emerald-200',
-      badge: 'Step 3',
+      badge: 'Step 8',
     },
     {
       id: 'sourcing-remote',
@@ -42,7 +42,7 @@ export function DailyRoutePage({ onNavigateCategory }) {
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-200',
-      badge: 'Step 4',
+      badge: 'Step 7',
     },
   ];
 

@@ -12,51 +12,57 @@ import {
 const TASKS = [
   {
     id: 'task-1',
-    text: 'LinkedIn Jobs: Enter a keyword from the Vault and search Tangier opportunities.',
-    tag: 'LinkedIn',
-    tagColor: 'bg-sky-50 text-sky-700 border-sky-200',
-  },
-  {
-    id: 'task-2',
-    text: 'Indeed Maroc: Enter a keyword from the Vault and search Tangier opportunities.',
-    tag: 'Indeed',
+    text: 'Check saved Indeed / local search feeds for fresh Tangier listings posted in the last 24–48 hours (Full-Stack, React, Laravel).',
+    tag: 'Aggregators',
     tagColor: 'bg-purple-50 text-purple-700 border-purple-200',
   },
   {
-    id: 'task-3',
-    text: "Government / Concours: Check Emploi-Public for 'Technicien de 3ème grade' or IT roles.",
-    tag: 'Concours',
-    tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  },
-  {
-    id: 'task-4',
-    text: "Remote Tech: Check Wellfound or RemoteOK for 'React' or 'Laravel' remote jobs.",
-    tag: 'Remote',
-    tagColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  },
-  {
-    id: 'task-5',
-    text: 'BPO Portals: Do a quick check on MyOpla, Foundever, or Intelcia career pages.',
-    tag: 'BPO Tangier',
-    tagColor: 'bg-teal-50 text-teal-700 border-teal-200',
-  },
-  {
-    id: 'task-6',
-    text: 'Map Recon: Open Google Maps and find 1-2 local companies (Logistics, IT, Transit in TFZ).',
+    id: 'task-2',
+    text: 'Use Search Library terms on Google Maps Tangier (Centre-Ville, Technopark, TFZ) to identify 1–2 target companies.',
     tag: 'Maps Recon',
     tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
   },
   {
-    id: 'task-7',
-    text: 'HR Hunt: Take the companies found on Maps, search them on LinkedIn, and find the HR/Manager profile.',
-    tag: 'HR Outreach',
+    id: 'task-3',
+    text: 'Open target agency website: review portfolio, tech stack, and locate public email or direct WhatsApp contact.',
+    tag: 'Screening',
+    tagColor: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  {
+    id: 'task-4',
+    text: 'Search company on LinkedIn under People filters to locate Founder, Managing Director, CTO, or Lead Developer.',
+    tag: 'LinkedIn HR',
+    tagColor: 'bg-sky-50 text-sky-700 border-sky-200',
+  },
+  {
+    id: 'task-5',
+    text: 'Create entry in Vault / Directory (Name, Website, Email/Contact, Key Person) and set status to "À Contacter".',
+    tag: 'Vault Save',
+    tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  },
+  {
+    id: 'task-6',
+    text: 'Run targeted Dork commands from Search Library and skim top 5 organic hits for unadvertised roles or founder calls.',
+    tag: 'Dork Scan',
     tagColor: 'bg-rose-50 text-rose-700 border-rose-200',
   },
   {
+    id: 'task-7',
+    text: 'Scan Wellfound and RemoteOK for junior/mid remote React or Laravel positions, and log viable matches to Vault.',
+    tag: 'Remote Hub',
+    tagColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  },
+  {
     id: 'task-8',
-    text: "Vault Logging: Save all found jobs and companies into Radar as 'To Apply' (Prepared for Tuesday).",
-    tag: 'Vault Save',
-    tagColor: 'bg-blue-50 text-blue-700 border-blue-200',
+    text: 'Scan Emploi-Public for newly published Technicien de 3ème grade IT concours or municipal tech listings.',
+    tag: 'Concours',
+    tagColor: 'bg-teal-50 text-teal-700 border-teal-200',
+  },
+  {
+    id: 'task-9',
+    text: 'Verify at least 1–2 high-quality targets logged in Vault and mark daily route complete.',
+    tag: 'Completion',
+    tagColor: 'bg-green-50 text-green-700 border-green-200',
   },
 ];
 
@@ -116,7 +122,7 @@ export function DailySourcingChecklist({ isCollapsible = false }) {
               </span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              8-step daily sourcing checklist for local Tangier, concours & remote targets
+              9-step daily sourcing protocol for local Tangier, concours & remote targets
             </p>
           </div>
         </div>
