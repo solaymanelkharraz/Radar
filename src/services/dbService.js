@@ -53,21 +53,32 @@ const mapAppToSupabase = (app) => ({
   notes: app.notes || null,
 });
 
-const mapCompanyFromSupabase = (row) => ({
-  id: row.id,
-  companyName: row.company_name || row.companyName,
-  sector: row.sector,
-  location: row.location,
-  hrEmail: row.hr_email || row.hrEmail,
-  phone: row.phone || row.contact_number || row.contactNumber || row.phone_number || '',
-  website: row.website,
-  contactStatus: row.contact_status || row.contactStatus || 'Not Contacted',
-  emailSubject: row.email_subject || row.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
-  emailBody: row.email_body !== undefined ? (row.email_body || "") : (row.emailBody || ""),
-  scheduledFor: row.scheduled_for || row.scheduledFor || null,
-  relanceSent: row.relance_sent !== undefined ? row.relance_sent : (row.relanceSent ?? false),
-  createdAt: row.created_at || row.createdAt,
-});
+const mapCompanyFromSupabase = (row) => {
+  const contactStatus = row.contact_status || row.contactStatus || 'Not Contacted';
+  let scheduledFor = row.scheduled_for || row.scheduledFor || null;
+
+  // Fallback: If company has 'CV Sent' but scheduled_for timestamp wasn't saved in DB,
+  // lock it to last Tuesday, Oct 6, 2026 at 09:30 AM
+  if (contactStatus === 'CV Sent' && !scheduledFor) {
+    scheduledFor = '2026-10-06T09:30:00.000Z';
+  }
+
+  return {
+    id: row.id,
+    companyName: row.company_name || row.companyName,
+    sector: row.sector,
+    location: row.location,
+    hrEmail: row.hr_email || row.hrEmail,
+    phone: row.phone || row.contact_number || row.contactNumber || row.phone_number || '',
+    website: row.website,
+    contactStatus,
+    emailSubject: row.email_subject || row.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
+    emailBody: row.email_body !== undefined ? (row.email_body || "") : (row.emailBody || ""),
+    scheduledFor,
+    relanceSent: row.relance_sent !== undefined ? row.relance_sent : (row.relanceSent ?? false),
+    createdAt: row.created_at || row.createdAt,
+  };
+};
 
 const mapCompanyToSupabase = (company) => ({
   company_name: company.companyName,
@@ -360,7 +371,7 @@ export const subscribeCompanies = (callback) => {
                 contactStatus: localMatch.contactStatus || mapped.contactStatus || 'Not Contacted',
                 emailSubject: localMatch.emailSubject || mapped.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
                 emailBody: localMatch.emailBody !== undefined ? localMatch.emailBody : (mapped.emailBody || ""),
-                scheduledFor: localMatch.scheduledFor !== undefined ? localMatch.scheduledFor : mapped.scheduledFor,
+                scheduledFor: mapped.scheduledFor || localMatch.scheduledFor || null,
                 relanceSent: localMatch.relanceSent !== undefined ? localMatch.relanceSent : (mapped.relanceSent ?? false),
               };
             }
