@@ -84,11 +84,11 @@ export function CompanyDirectory({
               className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer"
             >
               <option value="ALL">All Pipeline Statuses ({companies.length})</option>
-              <option value="RELANCE_DUE">🚨 Relance Due ({relanceDueCount})</option>
-              <option value="PROGRAMME">📅 Programmé ({programmedCount})</option>
-              <option value="EMAIL_1_SENT">✉️ E-mail 1 Envoyé ({email1SentCount})</option>
-              <option value="RELANCE_SENT">✅ Relance Envoyée ({relanceSentCount})</option>
-              <option value="A_CONTACTER">⏳ À Contacter ({aContacterCount})</option>
+              <option value="RELANCE_DUE">🚨 Follow-Up Due ({relanceDueCount})</option>
+              <option value="PROGRAMME">📅 Scheduled ({programmedCount})</option>
+              <option value="EMAIL_1_SENT">✉️ Email 1 Sent ({email1SentCount})</option>
+              <option value="RELANCE_SENT">✅ Follow-Up Sent ({relanceSentCount})</option>
+              <option value="A_CONTACTER">⏳ To Contact ({aContacterCount})</option>
             </select>
 
             {statusFilter !== 'ALL' && (

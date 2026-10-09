@@ -205,7 +205,7 @@ export default function App() {
     );
     await updateCompany(id, { relanceSent });
     showToast(
-      relanceSent ? 'Relance marqué comme envoyée ✓' : 'Statut relance réinitialisé',
+      relanceSent ? 'Follow-up marked as sent ✓' : 'Follow-up status reset',
       relanceSent ? 'success' : 'info'
     );
   };
