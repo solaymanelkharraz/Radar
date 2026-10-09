@@ -254,32 +254,6 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
               </div>
             </div>
 
-            {/* Follow-Up Status (when CV Sent) */}
-            {formData.contactStatus === 'CV Sent' && (
-              <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-indigo-900 block">
-                    Follow-Up Status
-                  </span>
-                  <span className="text-[11px] text-indigo-600 font-medium block">
-                    Mark if a 7-day follow-up email has already been sent
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, relanceSent: !formData.relanceSent })}
-                  className={`px-3.5 py-1.5 text-xs font-extrabold rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
-                    formData.relanceSent
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                      : 'bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50'
-                  }`}
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{formData.relanceSent ? '✓ Follow-Up Sent' : 'Mark Follow-Up Sent'}</span>
-                </button>
-              </div>
-            )}
-
             {/* Action Buttons */}
             <div className="pt-5 border-t border-slate-200 flex items-center justify-end gap-3">
               <button

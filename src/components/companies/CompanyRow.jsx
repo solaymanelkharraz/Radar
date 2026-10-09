@@ -1,6 +1,6 @@
 import React from 'react';
 import { Building2, ChevronRight, Mail, Send, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { handleOpenGmail, handleOpenGmailFollowUp } from '../../utils/gmailUtils';
+import { handleOpenGmail, handleOpenGmailSearchThread } from '../../utils/gmailUtils';
 import { getNextScheduledTuesday, getRelancePipelineStatus } from '../../utils/companyUtils';
 
 export function CompanyRow({
@@ -36,10 +36,10 @@ export function CompanyRow({
     }
   };
 
-  // Follow-Up (Relance) Draft Click
+  // Follow-Up Action: Executes ONLY when diffInDays >= 7 && !relanceSent
   const handleFollowUpClick = (e) => {
     e.stopPropagation();
-    handleOpenGmailFollowUp(hrEmail, companyName);
+    handleOpenGmailSearchThread(hrEmail);
     if (onToggleRelanceSent) {
       onToggleRelanceSent(id, true);
     }
@@ -108,21 +108,21 @@ export function CompanyRow({
               /* State 1: Initial Email Draft */
               <button
                 onClick={handleInitialDraftClick}
-                title="Draft initial email in Web Gmail & lock to Tuesday 09:30 AM send"
+                title="Draft initial email in Web Gmail & lock send date to upcoming Tuesday at 09:30 AM"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <Mail className="w-3.5 h-3.5 text-white stroke-[2.5]" />
                 <span>Draft in Web Gmail</span>
               </button>
             ) : isFollowUpDue ? (
-              /* State 2: Relance Due Alert Button */
+              /* State 2: Follow-Up Due (7+ days elapsed, relanceSent === false) */
               <button
                 onClick={handleFollowUpClick}
-                title="7 days elapsed! Click to send follow-up pitch in Web Gmail"
+                title="7 days elapsed! Search thread in Web Gmail and mark Follow-Up as Sent"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-md ring-2 ring-rose-500/30 animate-pulse cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                <span>🚨 Send Follow-Up Now</span>
+                <span>🚨 Send Follow-Up</span>
               </button>
             ) : relanceSent ? (
               /* State 3: Relance Already Sent */
@@ -131,15 +131,10 @@ export function CompanyRow({
                 <span>✓ Follow-Up Sent</span>
               </span>
             ) : (
-              /* State 4: E-mail 1 Sent, ready to send follow-up anytime */
-              <button
-                onClick={handleFollowUpClick}
-                title="Open Web Gmail with pre-filled follow-up pitch"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-xs cursor-pointer"
-              >
-                <Send className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                <span>Send Follow-Up</span>
-              </button>
+              /* State 4: Email 1 Sent, waiting for 7-day follow-up threshold */
+              <span className="text-slate-400 font-medium text-xs italic">
+                Follow-Up unlocks in 7d
+              </span>
             )}
           </div>
         ) : (

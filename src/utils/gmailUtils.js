@@ -46,3 +46,12 @@ Best regards,`;
   const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(hrEmail)}&su=${encodedSubject}&body=${encodedBody}`;
   window.open(gmailUrl, '_blank');
 };
+
+export const handleOpenGmailSearchThread = (hrEmail) => {
+  if (!hrEmail) {
+    alert("No HR email saved for this company.");
+    return;
+  }
+  const searchUrl = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(hrEmail)}`;
+  window.open(searchUrl, '_blank', 'noopener,noreferrer');
+};

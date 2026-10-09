@@ -17,7 +17,7 @@ import {
   MessageCircle,
   Clock,
 } from 'lucide-react';
-import { handleOpenGmail, handleOpenGmailFollowUp } from '../../utils/gmailUtils';
+import { handleOpenGmail, handleOpenGmailSearchThread } from '../../utils/gmailUtils';
 import { sanitizeMoroccanPhone, getWhatsAppUrl, getNextScheduledTuesday, getRelancePipelineStatus } from '../../utils/companyUtils';
 
 export function CompanyDetailDrawer({
@@ -75,16 +75,11 @@ export function CompanyDetailDrawer({
     }
   };
 
+  // Follow-Up Action: Executes ONLY when diffInDays >= 7 && !relanceSent
   const handleFollowUpClick = () => {
-    handleOpenGmailFollowUp(hrEmail, companyName);
+    handleOpenGmailSearchThread(hrEmail);
     if (onToggleRelanceSent) {
       onToggleRelanceSent(id, true);
-    }
-  };
-
-  const handleRelanceClick = () => {
-    if (onToggleRelanceSent) {
-      onToggleRelanceSent(id, !relanceSent);
     }
   };
 
@@ -178,7 +173,7 @@ export function CompanyDetailDrawer({
             {/* Pipeline & Scheduled Tuesday Send Status */}
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                Scheduled Tuesday Send & Relance Engine
+                Scheduled Tuesday Send & Follow-Up Engine
               </span>
               <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
@@ -208,27 +203,13 @@ export function CompanyDetailDrawer({
                     </strong>
                   </p>
                 )}
-
-                <div className="pt-2 border-t border-slate-100">
-                  <button
-                    onClick={handleRelanceClick}
-                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                      relanceSent
-                        ? 'bg-indigo-100 text-indigo-800 border border-indigo-300'
-                        : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs'
-                    }`}
-                  >
-                    <Send className="w-4 h-4 text-indigo-600" />
-                    <span>{relanceSent ? '✓ Follow-Up Sent (Marked)' : 'Mark Follow-Up Sent'}</span>
-                  </button>
-                </div>
               </div>
             </div>
 
             {/* HR Contact & Gmail Pitching Box */}
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                HR Contact & Web Gmail Drafting
+                HR Contact & Web Gmail Actions
               </span>
 
               {hrEmail ? (
@@ -266,7 +247,7 @@ export function CompanyDetailDrawer({
                       className="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md ring-2 ring-rose-500/30 animate-pulse transition-all active:scale-[0.98] cursor-pointer"
                     >
                       <Send className="w-4 h-4 stroke-[2.5]" />
-                      <span>🚨 Send Follow-Up Now (Web Gmail) ↗</span>
+                      <span>🚨 Send Follow-Up (Search Thread & Mark Sent) ↗</span>
                     </button>
                   ) : relanceSent ? (
                     <div className="w-full py-2.5 px-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
@@ -274,13 +255,9 @@ export function CompanyDetailDrawer({
                       <span>✓ Follow-Up Sent</span>
                     </div>
                   ) : (
-                    <button
-                      onClick={handleFollowUpClick}
-                      className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
-                    >
-                      <Send className="w-4 h-4 stroke-[2.5]" />
-                      <span>Send Follow-Up in Web Gmail ↗</span>
-                    </button>
+                    <p className="text-xs text-slate-400 font-medium italic text-center py-1">
+                      Follow-Up action unlocks after 7 days from Tuesday send lock.
+                    </p>
                   )}
                 </div>
               ) : (
