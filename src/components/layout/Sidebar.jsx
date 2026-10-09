@@ -30,28 +30,22 @@ export function Sidebar({
 
   const sourcingItems = [
     {
-      id: 'sourcing-it-support',
-      label: 'IT Support & Helpdesk',
-      icon: Headphones,
-      color: 'text-blue-600',
-    },
-    {
-      id: 'sourcing-back-office',
-      label: 'Back-Office & TFZ Logistics',
-      icon: Package,
-      color: 'text-amber-600',
-    },
-    {
       id: 'sourcing-government',
-      label: 'Government Concours',
+      label: '🏛️ Government Concours',
       icon: Landmark,
       color: 'text-emerald-600',
     },
     {
       id: 'sourcing-remote',
-      label: 'Online & Remote Work',
+      label: '💻 Remote Tech Hub',
       icon: Laptop,
       color: 'text-purple-600',
+    },
+    {
+      id: 'sourcing-local-fallback',
+      label: '🎧 Local Fallback',
+      icon: Headphones,
+      color: 'text-blue-600',
     },
   ];
 

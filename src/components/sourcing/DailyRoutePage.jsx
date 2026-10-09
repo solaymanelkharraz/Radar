@@ -5,29 +5,9 @@ import { Headphones, Package, Landmark, Laptop, ArrowRight, Sparkles } from 'luc
 export function DailyRoutePage({ onNavigateCategory }) {
   const categories = [
     {
-      id: 'sourcing-it-support',
-      title: 'IT Support & Helpdesk',
-      desc: 'Tangier BPO centers, Teleperformance, MyOpla & Indeed search strings.',
-      icon: Headphones,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      badge: 'Step 1 & 5',
-    },
-    {
-      id: 'sourcing-back-office',
-      title: 'Back-Office & TFZ Logistics',
-      desc: 'TFZ, Medhub, administrative & logistics directories.',
-      icon: Package,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-200',
-      badge: 'Step 2 & 5',
-    },
-    {
       id: 'sourcing-government',
-      title: 'Government Concours',
-      desc: 'Emploi-Public, Alwadifa Maroc & Anapec public sector exams.',
+      title: '🏛️ Government Concours',
+      desc: 'Emploi-Public.ma & Alwadifa-Maroc.com public sector IT notices.',
       icon: Landmark,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
@@ -36,13 +16,23 @@ export function DailyRoutePage({ onNavigateCategory }) {
     },
     {
       id: 'sourcing-remote',
-      title: 'Online & Remote Work',
-      desc: 'Wellfound, WeWorkRemotely & Remote Boolean keywords.',
+      title: '💻 Remote Tech Hub',
+      desc: 'Wellfound & RemoteOK global tech startup roles.',
       icon: Laptop,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-200',
       badge: 'Step 7',
+    },
+    {
+      id: 'sourcing-local-fallback',
+      title: '🎧 Local Fallback',
+      desc: 'MyOpla Careers Tangier & Tetouan tech support hub.',
+      icon: Headphones,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      badge: 'Step 1',
     },
   ];
 
@@ -57,15 +47,15 @@ export function DailyRoutePage({ onNavigateCategory }) {
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-blue-600" />
             <h3 className="text-base font-extrabold text-slate-900">
-              Sourcing Hub Portals & Quick Badges
+              High-Signal Sourcing Hubs
             </h3>
           </div>
           <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
-            4 Sourcing Pages
+            3 Focused Hubs
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
