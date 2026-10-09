@@ -7,7 +7,8 @@ import { CompanyDirectory } from './components/companies/CompanyDirectory';
 import { CompanyModal } from './components/companies/CompanyModal';
 import { SourcingCategoryView } from './components/sourcing/SourcingCategoryView';
 import { DailyRoutePage } from './components/sourcing/DailyRoutePage';
-import { SearchLibraryPage } from './components/sourcing/SearchLibraryPage';
+import { SearchCompany } from './components/sourcing/SearchCompany';
+import { DeveloperSearch } from './components/sourcing/DeveloperSearch';
 import { SurvivalProtocolPage } from './components/sourcing/SurvivalProtocolPage';
 import { Toast } from './components/ui/Toast';
 import {
@@ -321,16 +322,29 @@ export default function App() {
               </motion.div>
             )}
 
-            {/* 4. Search Library (Hunting Ground) */}
-            {activeView === 'search-library' && (
+            {/* 4. Search Company (Local Physical Companies) */}
+            {(activeView === 'search-company' || activeView === 'search-library') && (
               <motion.div
-                key="search-library"
+                key="search-company"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <SearchLibraryPage searchQuery={searchQuery} />
+                <SearchCompany searchQuery={searchQuery} />
+              </motion.div>
+            )}
+
+            {/* 5. Developer Search (Pre-filtered Feeds & X-Ray Dorks) */}
+            {activeView === 'developer-search' && (
+              <motion.div
+                key="developer-search"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <DeveloperSearch searchQuery={searchQuery} />
               </motion.div>
             )}
 

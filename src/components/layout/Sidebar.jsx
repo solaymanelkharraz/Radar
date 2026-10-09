@@ -15,6 +15,7 @@ import {
   CheckSquare,
   Search,
   LifeBuoy,
+  Code2,
 } from 'lucide-react';
 import { isDemoMode } from '../../config/supabaseClient';
 
@@ -172,11 +173,11 @@ export function Sidebar({
             </span>
           </button>
 
-          {/* 4. Search Library (Hunting Ground) */}
+          {/* 4. Search Company (Local Recon) */}
           <button
-            onClick={() => setActiveView('search-library')}
+            onClick={() => setActiveView('search-company')}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeView === 'search-library'
+              activeView === 'search-company' || activeView === 'search-library'
                 ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
@@ -184,13 +185,35 @@ export function Sidebar({
             <div className="flex items-center gap-3">
               <Search
                 className={`w-4 h-4 ${
-                  activeView === 'search-library' ? 'text-blue-600' : 'text-slate-400'
+                  activeView === 'search-company' || activeView === 'search-library' ? 'text-blue-600' : 'text-slate-400'
                 }`}
               />
-              <span>Search Library</span>
+              <span>Search Company</span>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+              Recon
+            </span>
+          </button>
+
+          {/* 5. Developer Search (Direct Feeds & Dorks) */}
+          <button
+            onClick={() => setActiveView('developer-search')}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              activeView === 'developer-search'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Code2
+                className={`w-4 h-4 ${
+                  activeView === 'developer-search' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
+              <span>Developer Search</span>
             </div>
             <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">
-              Hub
+              Tech
             </span>
           </button>
 
