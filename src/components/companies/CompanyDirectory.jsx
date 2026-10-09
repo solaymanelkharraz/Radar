@@ -18,7 +18,9 @@ export function CompanyDirectory({
 }) {
   const [sectorFilter, setSectorFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+
+  const selectedCompany = companies.find((c) => c.id === selectedCompanyId) || null;
 
   // Extract unique sectors
   const sectorsList = ['ALL', ...new Set(companies.map((c) => c.sector).filter(Boolean))];
@@ -129,7 +131,7 @@ export function CompanyDirectory({
                   <CompanyRow
                     key={comp.id}
                     company={comp}
-                    onClick={() => setSelectedCompany(comp)}
+                    onClick={() => setSelectedCompanyId(comp.id)}
                     onCopyEmail={onCopyEmail}
                     onDraftGmail={onDraftGmail}
                     onToggleRelanceSent={onToggleRelanceSent}
@@ -159,8 +161,8 @@ export function CompanyDirectory({
 
       {/* Slide-over Company Detail Drawer */}
       <CompanyDetailDrawer
-        isOpen={!!selectedCompany}
-        onClose={() => setSelectedCompany(null)}
+        isOpen={!!selectedCompanyId && !!selectedCompany}
+        onClose={() => setSelectedCompanyId(null)}
         company={selectedCompany}
         onEdit={onEdit}
         onDelete={onDelete}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Building2 } from 'lucide-react';
+import { X, Save, Building2, Send } from 'lucide-react';
+import { getNextScheduledTuesday } from '../../utils/companyUtils';
 
 export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
   const [formData, setFormData] = useState({
@@ -66,7 +67,16 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.companyName.trim()) return;
-    onSave(formData);
+
+    const payload = { ...formData };
+    if (payload.contactStatus === 'CV Sent' && !payload.scheduledFor) {
+      payload.scheduledFor = getNextScheduledTuesday().toISOString();
+    } else if (payload.contactStatus === 'Not Contacted') {
+      payload.scheduledFor = null;
+      payload.relanceSent = false;
+    }
+
+    onSave(payload);
   };
 
   return (
@@ -223,7 +233,15 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
                   <button
                     type="button"
                     key={st}
-                    onClick={() => setFormData({ ...formData, contactStatus: st })}
+                    onClick={() => {
+                      const isCvSent = st === 'CV Sent';
+                      setFormData({
+                        ...formData,
+                        contactStatus: st,
+                        scheduledFor: isCvSent ? (formData.scheduledFor || getNextScheduledTuesday().toISOString()) : null,
+                        relanceSent: isCvSent ? formData.relanceSent : false,
+                      });
+                    }}
                     className={`flex-1 py-2.5 px-4 text-xs font-bold rounded-xl border text-center transition-all cursor-pointer ${
                       formData.contactStatus === st
                         ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
@@ -235,6 +253,32 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
                 ))}
               </div>
             </div>
+
+            {/* Follow-Up Status (when CV Sent) */}
+            {formData.contactStatus === 'CV Sent' && (
+              <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-indigo-900 block">
+                    Follow-Up Status
+                  </span>
+                  <span className="text-[11px] text-indigo-600 font-medium block">
+                    Mark if a 7-day follow-up email has already been sent
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, relanceSent: !formData.relanceSent })}
+                  className={`px-3.5 py-1.5 text-xs font-extrabold rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
+                    formData.relanceSent
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                      : 'bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50'
+                  }`}
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{formData.relanceSent ? '✓ Follow-Up Sent' : 'Mark Follow-Up Sent'}</span>
+                </button>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="pt-5 border-t border-slate-200 flex items-center justify-end gap-3">
