@@ -59,10 +59,13 @@ const mapCompanyFromSupabase = (row) => ({
   sector: row.sector,
   location: row.location,
   hrEmail: row.hr_email || row.hrEmail,
+  phone: row.phone || row.contact_number || row.contactNumber || row.phone_number || '',
   website: row.website,
-  contactStatus: row.contact_status || row.contactStatus,
+  contactStatus: row.contact_status || row.contactStatus || 'Not Contacted',
   emailSubject: row.email_subject || row.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
   emailBody: row.email_body !== undefined ? (row.email_body || "") : (row.emailBody || ""),
+  scheduledFor: row.scheduled_for || row.scheduledFor || null,
+  relanceSent: row.relance_sent !== undefined ? row.relance_sent : (row.relanceSent ?? false),
   createdAt: row.created_at || row.createdAt,
 });
 
@@ -71,10 +74,13 @@ const mapCompanyToSupabase = (company) => ({
   sector: company.sector || null,
   location: company.location || null,
   hr_email: company.hrEmail || null,
+  phone: company.phone || null,
   website: company.website || null,
   contact_status: company.contactStatus || 'Not Contacted',
   email_subject: company.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
   email_body: company.emailBody || null,
+  scheduled_for: company.scheduledFor || null,
+  relance_sent: company.relanceSent ?? false,
 });
 
 // -------------------------------------------------------------
@@ -349,10 +355,13 @@ export const subscribeCompanies = (callback) => {
                 sector: mapped.sector || localMatch.sector,
                 location: mapped.location || localMatch.location,
                 hrEmail: mapped.hrEmail || localMatch.hrEmail,
+                phone: localMatch.phone || mapped.phone || '',
                 website: mapped.website || localMatch.website,
                 contactStatus: localMatch.contactStatus || mapped.contactStatus || 'Not Contacted',
                 emailSubject: localMatch.emailSubject || mapped.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
                 emailBody: localMatch.emailBody !== undefined ? localMatch.emailBody : (mapped.emailBody || ""),
+                scheduledFor: localMatch.scheduledFor !== undefined ? localMatch.scheduledFor : mapped.scheduledFor,
+                relanceSent: localMatch.relanceSent !== undefined ? localMatch.relanceSent : (mapped.relanceSent ?? false),
               };
             }
             return mapped;
@@ -406,8 +415,11 @@ export const subscribeCompanies = (callback) => {
 export const addCompany = async (companyData) => {
   const newItem = {
     ...companyData,
+    phone: companyData.phone || '',
     emailSubject: companyData.emailSubject || "Candidature Spontanée : Développeur Full-Stack",
     emailBody: companyData.emailBody || "",
+    scheduledFor: companyData.scheduledFor || null,
+    relanceSent: companyData.relanceSent ?? false,
   };
 
   const saveLocalCompany = (assignedId) => {
@@ -438,6 +450,9 @@ export const addCompany = async (companyData) => {
     if (error && (error.code === 'PGRST204' || error.status === 400)) {
       delete payload.email_subject;
       delete payload.email_body;
+      delete payload.phone;
+      delete payload.scheduled_for;
+      delete payload.relance_sent;
       const retry = await supabase.from('companies').insert([payload]).select();
       data = retry.data;
       error = retry.error;
@@ -476,16 +491,22 @@ export const updateCompany = async (id, companyData) => {
     if (companyData.sector !== undefined) payload.sector = companyData.sector || null;
     if (companyData.location !== undefined) payload.location = companyData.location || null;
     if (companyData.hrEmail !== undefined) payload.hr_email = companyData.hrEmail || null;
+    if (companyData.phone !== undefined) payload.phone = companyData.phone || null;
     if (companyData.website !== undefined) payload.website = companyData.website || null;
     if (companyData.contactStatus !== undefined) payload.contact_status = companyData.contactStatus;
     if (companyData.emailSubject !== undefined) payload.email_subject = companyData.emailSubject;
     if (companyData.emailBody !== undefined) payload.email_body = companyData.emailBody || null;
+    if (companyData.scheduledFor !== undefined) payload.scheduled_for = companyData.scheduledFor || null;
+    if (companyData.relanceSent !== undefined) payload.relance_sent = companyData.relanceSent;
 
     let { error } = await supabase.from('companies').update(payload).eq('id', id);
 
     if (error && (error.code === 'PGRST204' || error.status === 400)) {
       delete payload.email_subject;
       delete payload.email_body;
+      delete payload.phone;
+      delete payload.scheduled_for;
+      delete payload.relance_sent;
       const retry = await supabase.from('companies').update(payload).eq('id', id);
       error = retry.error;
     }

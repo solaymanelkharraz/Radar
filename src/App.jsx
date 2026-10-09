@@ -175,12 +175,38 @@ export default function App() {
     }
   };
 
-  const handleToggleCompanyStatus = async (id, newContactStatus) => {
+  const handleToggleCompanyStatus = async (id, newContactStatus, scheduledForDate = null) => {
+    const updatePayload = { contactStatus: newContactStatus };
+    if (scheduledForDate) updatePayload.scheduledFor = scheduledForDate;
+
     setCompanies((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, contactStatus: newContactStatus } : c))
+      prev.map((c) => (c.id === id ? { ...c, ...updatePayload } : c))
     );
-    await updateCompany(id, { contactStatus: newContactStatus });
+    await updateCompany(id, updatePayload);
     showToast(`Contact status updated to "${newContactStatus}"`, 'success');
+  };
+
+  const handleDraftGmailAndSchedule = async (id, nextTuesdayISO) => {
+    setCompanies((prev) =>
+      prev.map((c) =>
+        c.id === id
+          ? { ...c, contactStatus: 'CV Sent', scheduledFor: nextTuesdayISO }
+          : c
+      )
+    );
+    await updateCompany(id, { contactStatus: 'CV Sent', scheduledFor: nextTuesdayISO });
+    showToast('Draft opened! Locked to Tuesday 09:30 AM send', 'success');
+  };
+
+  const handleToggleRelanceSent = async (id, relanceSent) => {
+    setCompanies((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, relanceSent } : c))
+    );
+    await updateCompany(id, { relanceSent });
+    showToast(
+      relanceSent ? 'Relance marqué comme envoyée ✓' : 'Statut relance réinitialisé',
+      relanceSent ? 'success' : 'info'
+    );
   };
 
   const handleCopyEmailToast = (email) => {
@@ -264,6 +290,8 @@ export default function App() {
                   onEdit={handleEditCompany}
                   onDelete={handleDeleteCompany}
                   onCopyEmail={handleCopyEmailToast}
+                  onDraftGmail={handleDraftGmailAndSchedule}
+                  onToggleRelanceSent={handleToggleRelanceSent}
                   onStatusToggle={handleToggleCompanyStatus}
                   onOpenAdd={handleOpenAddCompany}
                 />

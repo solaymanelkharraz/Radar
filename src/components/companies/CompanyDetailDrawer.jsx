@@ -1,15 +1,58 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, MapPin, Globe, Mail, Send, Copy, Check, Edit2, Trash2, ExternalLink, FileText } from 'lucide-react';
-import { Badge } from '../ui/Badge';
+import {
+  X,
+  Building2,
+  MapPin,
+  Globe,
+  Mail,
+  Send,
+  Copy,
+  Check,
+  Edit2,
+  Trash2,
+  ExternalLink,
+  FileText,
+  Phone,
+  MessageCircle,
+  Clock,
+} from 'lucide-react';
 import { handleOpenGmail } from '../../utils/gmailUtils';
+import { sanitizeMoroccanPhone, getWhatsAppUrl, getNextScheduledTuesday, getRelancePipelineStatus } from '../../utils/companyUtils';
 
-export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete, onCopyEmail, onStatusToggle }) {
+export function CompanyDetailDrawer({
+  isOpen,
+  onClose,
+  company,
+  onEdit,
+  onDelete,
+  onCopyEmail,
+  onDraftGmail,
+  onToggleRelanceSent,
+  onStatusToggle,
+}) {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !company) return null;
 
-  const { id, companyName, sector, location, hrEmail, website, contactStatus, emailSubject, emailBody } = company;
+  const {
+    id,
+    companyName,
+    sector,
+    location,
+    hrEmail,
+    phone,
+    website,
+    contactStatus,
+    emailSubject,
+    emailBody,
+    scheduledFor,
+    relanceSent,
+  } = company;
+
+  const cleanPhone = sanitizeMoroccanPhone(phone);
+  const waUrl = getWhatsAppUrl(phone);
+  const pipelineStatus = getRelancePipelineStatus(company);
 
   const handleCopy = () => {
     if (!hrEmail) return;
@@ -17,6 +60,22 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
     setCopied(true);
     if (onCopyEmail) onCopyEmail(hrEmail);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDraftClick = () => {
+    handleOpenGmail(hrEmail, emailSubject, emailBody, companyName);
+    const nextTuesdayISO = getNextScheduledTuesday().toISOString();
+    if (onDraftGmail) {
+      onDraftGmail(id, nextTuesdayISO);
+    } else if (onStatusToggle) {
+      onStatusToggle(id, 'CV Sent', nextTuesdayISO);
+    }
+  };
+
+  const handleRelanceClick = () => {
+    if (onToggleRelanceSent) {
+      onToggleRelanceSent(id, !relanceSent);
+    }
   };
 
   return (
@@ -45,12 +104,11 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
               <span className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-bold text-xs">
                 {sector || 'Corporate'}
               </span>
-              <button
-                onClick={() => onStatusToggle(id, contactStatus === 'CV Sent' ? 'Not Contacted' : 'CV Sent')}
-                className="focus:outline-none cursor-pointer"
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold border ${pipelineStatus.bgColor} ${pipelineStatus.textColor} ${pipelineStatus.borderColor}`}
               >
-                <Badge variant={contactStatus}>{contactStatus || 'Not Contacted'}</Badge>
-              </button>
+                {pipelineStatus.label}
+              </span>
             </div>
 
             <button
@@ -75,8 +133,84 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
                   </h2>
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mt-1">
                     <MapPin className="w-4 h-4 text-slate-400" />
-                    <span>{location || 'Morocco'}</span>
+                    <span>{location || 'Tangier, Morocco'}</span>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Phone & Direct WhatsApp Section */}
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                Direct Contact & WhatsApp Outreach
+              </span>
+              {cleanPhone ? (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
+                  <div className="flex items-center gap-2.5 text-xs font-mono font-semibold text-slate-800">
+                    <Phone className="w-4 h-4 text-emerald-600" />
+                    <span>{phone}</span>
+                  </div>
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 font-extrabold text-xs transition-all active:scale-95 shadow-2xs"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-600 fill-emerald-100" />
+                    <span>Chat on WhatsApp ↗</span>
+                  </a>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 italic">No contact number provided for this company.</p>
+              )}
+            </div>
+
+            {/* Pipeline & Scheduled Tuesday Send Status */}
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                Scheduled Tuesday Send & Relance Engine
+              </span>
+              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    Current Pipeline Status:
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold border ${pipelineStatus.bgColor} ${pipelineStatus.textColor} ${pipelineStatus.borderColor}`}
+                  >
+                    {pipelineStatus.label}
+                  </span>
+                </div>
+
+                {scheduledFor && (
+                  <p className="text-[11px] text-slate-500">
+                    Scheduled Send Lock:{' '}
+                    <strong className="text-slate-800 font-mono">
+                      {new Date(scheduledFor).toLocaleString('fr-FR', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </strong>
+                  </p>
+                )}
+
+                <div className="pt-2 border-t border-slate-100">
+                  <button
+                    onClick={handleRelanceClick}
+                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                      relanceSent
+                        ? 'bg-indigo-100 text-indigo-800 border border-indigo-300'
+                        : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs'
+                    }`}
+                  >
+                    <Send className="w-4 h-4 text-indigo-600" />
+                    <span>{relanceSent ? '✓ Relance Envoyée (Marked)' : 'Marquer Relance Envoyée'}</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -84,7 +218,7 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
             {/* HR Contact & Gmail Pitching Box */}
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
-                HR Contact & Gmail Drafting
+                HR Contact & Web Gmail Drafting
               </span>
 
               {hrEmail ? (
@@ -109,16 +243,11 @@ export function CompanyDetailDrawer({ isOpen, onClose, company, onEdit, onDelete
 
                   {/* Draft in Web Gmail Button */}
                   <button
-                    onClick={() => {
-                      handleOpenGmail(hrEmail, emailSubject, emailBody, companyName);
-                      if (onStatusToggle && contactStatus !== 'CV Sent') {
-                        onStatusToggle(id, 'CV Sent');
-                      }
-                    }}
+                    onClick={handleDraftClick}
                     className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Mail className="w-4 h-4 stroke-[2.5]" />
-                    <span>Draft in Web Gmail ↗</span>
+                    <span>Draft in Web Gmail (Schedule Tuesday 09:30) ↗</span>
                   </button>
                 </div>
               ) : (

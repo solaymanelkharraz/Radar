@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { CompanyRow } from './CompanyRow';
 import { CompanyDetailDrawer } from './CompanyDetailDrawer';
-import { Building2, Plus, Filter, Mail, RotateCcw } from 'lucide-react';
+import { Building2, Plus, Filter, Mail, RotateCcw, Clock } from 'lucide-react';
+import { getRelancePipelineStatus } from '../../utils/companyUtils';
 
-export function CompanyDirectory({ companies, searchQuery, onEdit, onDelete, onCopyEmail, onStatusToggle, onOpenAdd }) {
+export function CompanyDirectory({
+  companies,
+  searchQuery,
+  onEdit,
+  onDelete,
+  onCopyEmail,
+  onStatusToggle,
+  onDraftGmail,
+  onToggleRelanceSent,
+  onOpenAdd,
+}) {
   const [sectorFilter, setSectorFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -11,25 +22,34 @@ export function CompanyDirectory({ companies, searchQuery, onEdit, onDelete, onC
   // Extract unique sectors
   const sectorsList = ['ALL', ...new Set(companies.map((c) => c.sector).filter(Boolean))];
 
-  // Counts
-  const cvSentCount = companies.filter((c) => c.contactStatus === 'CV Sent').length;
-  const notContactedCount = companies.filter((c) => c.contactStatus !== 'CV Sent').length;
+  // Pipeline status counts
+  const relanceDueCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'RELANCE_DUE').length;
+  const programmedCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'PROGRAMME').length;
+  const relanceSentCount = companies.filter((c) => getRelancePipelineStatus(c).rawKey === 'RELANCE_SENT').length;
 
-  // Filter companies by search query, sector & email status
+  // Filter companies by search query, sector & pipeline status
   const filteredCompanies = companies.filter((c) => {
+    const pipeline = getRelancePipelineStatus(c);
     const matchesSearch =
       !searchQuery ||
       c.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.sector && c.sector.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (c.location && c.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (c.hrEmail && c.hrEmail.toLowerCase().includes(searchQuery.toLowerCase()));
+      (c.hrEmail && c.hrEmail.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (c.phone && c.phone.includes(searchQuery));
 
     const matchesSector = sectorFilter === 'ALL' || c.sector === sectorFilter;
 
-    const matchesStatus =
-      statusFilter === 'ALL' ||
-      (statusFilter === 'CV Sent' && c.contactStatus === 'CV Sent') ||
-      (statusFilter === 'Not Contacted' && c.contactStatus !== 'CV Sent');
+    let matchesStatus = true;
+    if (statusFilter === 'RELANCE_DUE') {
+      matchesStatus = pipeline.rawKey === 'RELANCE_DUE';
+    } else if (statusFilter === 'PROGRAMME') {
+      matchesStatus = pipeline.rawKey === 'PROGRAMME';
+    } else if (statusFilter === 'RELANCE_SENT') {
+      matchesStatus = pipeline.rawKey === 'RELANCE_SENT';
+    } else if (statusFilter === 'A_CONTACTER') {
+      matchesStatus = pipeline.rawKey === 'A_CONTACTER';
+    }
 
     return matchesSearch && matchesSector && matchesStatus;
   });
@@ -59,18 +79,20 @@ export function CompanyDirectory({ companies, searchQuery, onEdit, onDelete, onC
           ))}
         </div>
 
-        {/* Right: Email Contact Status Filter Dropdown & Add Button */}
+        {/* Right: Pipeline Status Filter & Add Button */}
         <div className="flex flex-wrap items-center gap-3 justify-end flex-shrink-0">
           <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-slate-400" />
+            <Clock className="w-4 h-4 text-slate-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-xs cursor-pointer"
             >
-              <option value="ALL">All Email Statuses ({companies.length})</option>
-              <option value="CV Sent">📩 Email / CV Sent ({cvSentCount})</option>
-              <option value="Not Contacted">⏳ Email Pending / Not Contacted ({notContactedCount})</option>
+              <option value="ALL">All Pipeline Statuses ({companies.length})</option>
+              <option value="RELANCE_DUE">🚨 Relance Due (Mardi) ({relanceDueCount})</option>
+              <option value="PROGRAMME">📅 Programmé (Mardi 09:30) ({programmedCount})</option>
+              <option value="RELANCE_SENT">✅ Relance Envoyée ({relanceSentCount})</option>
+              <option value="A_CONTACTER">⏳ À Contacter</option>
             </select>
 
             {statusFilter !== 'ALL' && (
@@ -97,13 +119,13 @@ export function CompanyDirectory({ companies, searchQuery, onEdit, onDelete, onC
       {/* Clean Data Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[750px]">
+          <table className="w-full text-left border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3.5 px-6">Company</th>
-                <th className="py-3.5 px-6">Sector</th>
-                <th className="py-3.5 px-6">Location</th>
-                <th className="py-3.5 px-6">Email Status</th>
+                <th className="py-3.5 px-6">Sector & Location</th>
+                <th className="py-3.5 px-6">Phone / WhatsApp</th>
+                <th className="py-3.5 px-6">Pipeline & Follow-Up Status</th>
                 <th className="py-3.5 px-6">HR Email & Gmail Draft</th>
                 <th className="py-3.5 px-6 text-right">Details</th>
               </tr>
@@ -116,6 +138,8 @@ export function CompanyDirectory({ companies, searchQuery, onEdit, onDelete, onC
                     company={comp}
                     onClick={() => setSelectedCompany(comp)}
                     onCopyEmail={onCopyEmail}
+                    onDraftGmail={onDraftGmail}
+                    onToggleRelanceSent={onToggleRelanceSent}
                     onStatusToggle={onStatusToggle}
                   />
                 ))
@@ -148,6 +172,8 @@ export function CompanyDirectory({ companies, searchQuery, onEdit, onDelete, onC
         onEdit={onEdit}
         onDelete={onDelete}
         onCopyEmail={onCopyEmail}
+        onDraftGmail={onDraftGmail}
+        onToggleRelanceSent={onToggleRelanceSent}
         onStatusToggle={onStatusToggle}
       />
     </div>

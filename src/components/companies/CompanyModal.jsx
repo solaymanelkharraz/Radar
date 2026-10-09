@@ -8,10 +8,13 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
     sector: 'IT & Services',
     location: '',
     hrEmail: '',
+    phone: '',
     website: '',
     contactStatus: 'Not Contacted',
     emailSubject: 'Candidature Spontanée : Développeur Full-Stack',
     emailBody: '',
+    scheduledFor: null,
+    relanceSent: false,
   });
 
   const sectors = [
@@ -33,10 +36,13 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         sector: companyToEdit.sector || 'IT & Services',
         location: companyToEdit.location || '',
         hrEmail: companyToEdit.hrEmail || '',
+        phone: companyToEdit.phone || '',
         website: companyToEdit.website || '',
         contactStatus: companyToEdit.contactStatus || 'Not Contacted',
         emailSubject: companyToEdit.emailSubject || 'Candidature Spontanée : Développeur Full-Stack',
         emailBody: companyToEdit.emailBody || '',
+        scheduledFor: companyToEdit.scheduledFor || null,
+        relanceSent: companyToEdit.relanceSent ?? false,
       });
     } else {
       setFormData({
@@ -44,10 +50,13 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         sector: 'IT & Services',
         location: '',
         hrEmail: '',
+        phone: '',
         website: '',
         contactStatus: 'Not Contacted',
         emailSubject: 'Candidature Spontanée : Développeur Full-Stack',
         emailBody: '',
+        scheduledFor: null,
+        relanceSent: false,
       });
     }
   }, [companyToEdit, isOpen]);
@@ -133,18 +142,33 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
               </div>
             </div>
 
-            {/* HR Email */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                HR / Recruiter Email
-              </label>
-              <input
-                type="email"
-                placeholder="e.g. recrutement.tanger@company.com"
-                value={formData.hrEmail}
-                onChange={(e) => setFormData({ ...formData, hrEmail: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm font-mono"
-              />
+            {/* Grid 2-cols: HR Email & Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  HR / Recruiter Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="e.g. recrutement.tanger@company.com"
+                  value={formData.hrEmail}
+                  onChange={(e) => setFormData({ ...formData, hrEmail: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm font-mono"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Phone / WhatsApp Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 0612345678 or +212612345678"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm font-mono"
+                />
+              </div>
             </div>
 
             {/* Email Subject */}
