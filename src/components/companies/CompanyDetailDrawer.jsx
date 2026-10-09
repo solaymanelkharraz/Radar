@@ -197,7 +197,7 @@ export function CompanyDetailDrawer({
                   <p className="text-[11px] text-slate-500">
                     Scheduled Send Lock:{' '}
                     <strong className="text-slate-800 font-mono">
-                      {new Date(scheduledFor).toLocaleString('fr-FR', {
+                      {new Date(scheduledFor).toLocaleString('en-US', {
                         weekday: 'short',
                         year: 'numeric',
                         month: 'short',
@@ -219,7 +219,7 @@ export function CompanyDetailDrawer({
                     }`}
                   >
                     <Send className="w-4 h-4 text-indigo-600" />
-                    <span>{relanceSent ? '✓ Relance Envoyée (Marked)' : 'Marquer Relance Envoyée'}</span>
+                    <span>{relanceSent ? '✓ Follow-Up Sent (Marked)' : 'Mark Follow-Up Sent'}</span>
                   </button>
                 </div>
               </div>
@@ -271,7 +271,7 @@ export function CompanyDetailDrawer({
                   ) : relanceSent ? (
                     <div className="w-full py-2.5 px-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
                       <Check className="w-4 h-4 text-indigo-600" />
-                      <span>✓ Relance Envoyée</span>
+                      <span>✓ Follow-Up Sent</span>
                     </div>
                   ) : (
                     <button
@@ -279,7 +279,7 @@ export function CompanyDetailDrawer({
                       className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
                     >
                       <Send className="w-4 h-4 stroke-[2.5]" />
-                      <span>Send Follow-Up (Relance) in Web Gmail ↗</span>
+                      <span>Send Follow-Up in Web Gmail ↗</span>
                     </button>
                   )}
                 </div>
@@ -297,7 +297,7 @@ export function CompanyDetailDrawer({
               <div className="space-y-2">
                 <div className="text-xs font-semibold text-slate-900 bg-white p-3 rounded-xl border border-slate-200">
                   <span className="text-slate-400 font-normal">Subject: </span>
-                  {emailSubject || "Candidature Spontanée : Développeur Full-Stack"}
+                  {emailSubject || "Application: Full-Stack Developer Position"}
                 </div>
                 {emailBody && (
                   <div className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200 font-mono whitespace-pre-line leading-relaxed max-h-[140px] overflow-y-auto">

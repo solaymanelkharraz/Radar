@@ -21,10 +21,13 @@ export function sanitizeMoroccanPhone(phone) {
 /**
  * Generates direct WhatsApp URL with pre-filled candidate message
  */
+/**
+ * Generates direct WhatsApp URL with pre-filled candidate message
+ */
 export function getWhatsAppUrl(phone, customMessage) {
   const cleanPhone = sanitizeMoroccanPhone(phone);
   if (!cleanPhone) return null;
-  const defaultMsg = "Bonjour, je vous contacte suite à ma candidature spontanée pour le poste de Développeur Full-Stack.";
+  const defaultMsg = "Hello, I am reaching out regarding my application for the Full-Stack Developer position.";
   const encodedMessage = encodeURIComponent(customMessage || defaultMsg);
   return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
 }
@@ -58,14 +61,14 @@ export function getNextScheduledTuesday(fromDate = new Date()) {
 }
 
 /**
- * Computes pipeline status badge for scheduled Tuesday send & 7-day follow-up (relance) engine
+ * Computes pipeline status badge for scheduled Tuesday send & 7-day follow-up engine
  */
 export function getRelancePipelineStatus(company, now = new Date()) {
   const { scheduledFor, relanceSent } = company || {};
 
   if (!scheduledFor) {
     return {
-      label: "À Contacter",
+      label: "To Contact",
       variant: "warning",
       bgColor: "bg-amber-50",
       textColor: "text-amber-700",
@@ -78,14 +81,12 @@ export function getRelancePipelineStatus(company, now = new Date()) {
   const nowDate = new Date(now);
 
   if (nowDate.getTime() < scheduledDate.getTime()) {
-    // Format date e.g. "mar. 14 Oct" in French short date format
-    const options = { weekday: 'short', day: 'numeric', month: 'short' };
-    let dateStr = scheduledDate.toLocaleDateString('fr-FR', options);
-    // Capitalize first letter e.g. "Mar. 14 Oct."
-    dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    // Format date e.g. "Tue, Oct 14" in English short date format
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    const dateStr = scheduledDate.toLocaleDateString('en-US', options);
     
     return {
-      label: `Programmé (${dateStr})`,
+      label: `Scheduled (${dateStr})`,
       variant: "neutral",
       bgColor: "bg-slate-100",
       textColor: "text-slate-700",
@@ -100,7 +101,7 @@ export function getRelancePipelineStatus(company, now = new Date()) {
 
   if (relanceSent) {
     return {
-      label: "Relance Envoyée",
+      label: "Follow-Up Sent",
       variant: "info",
       bgColor: "bg-indigo-50",
       textColor: "text-indigo-700",
@@ -111,7 +112,7 @@ export function getRelancePipelineStatus(company, now = new Date()) {
 
   if (diffInDays >= 7) {
     return {
-      label: "Relance Due (Mardi)",
+      label: "Follow-Up Due (Tuesday)",
       variant: "danger",
       bgColor: "bg-rose-50",
       textColor: "text-rose-700",
@@ -122,7 +123,7 @@ export function getRelancePipelineStatus(company, now = new Date()) {
   }
 
   return {
-    label: `E-mail 1 Envoyé (${diffInDays}j)`,
+    label: `Email 1 Sent (${diffInDays}d)`,
     variant: "success",
     bgColor: "bg-emerald-50",
     textColor: "text-emerald-700",

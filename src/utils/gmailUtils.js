@@ -3,18 +3,18 @@ export const handleOpenGmail = (hrEmail, subject, body, companyName = '') => {
     alert("No HR email saved for this company.");
     return;
   }
-  const safeSubject = subject || "Candidature Spontanée : Développeur Full-Stack";
-  const defaultBody = `Bonjour,
+  const safeSubject = subject || "Application: Full-Stack Developer Position";
+  const defaultBody = `Hello,
 
-Je vous adresse ma candidature spontanée pour un poste de Développeur Full-Stack au sein de ${companyName || 'votre entreprise'}.
+I am writing to express my interest in a Full-Stack Developer position at ${companyName || 'your company'}.
 
-Passionné par la conception d'applications web modernes, évolutives et performantes, je serais ravi de pouvoir vous présenter mon parcours ainsi que mes compétences techniques.
+Passionate about building modern, scalable, and high-performance web applications, I would welcome the opportunity to present my background and technical capabilities.
 
-Vous trouverez mon CV ci-joint à cet email.
+Please find my resume attached to this email.
 
-Je reste à votre entière disposition pour tout échange ou entretien.
+I remain available at your earliest convenience for an interview.
 
-Cordialement,`;
+Best regards,`;
 
   const safeBody = body || defaultBody;
   const encodedSubject = encodeURIComponent(safeSubject);
@@ -28,18 +28,18 @@ export const handleOpenGmailFollowUp = (hrEmail, companyName = '') => {
     alert("No HR email saved for this company.");
     return;
   }
-  const relanceSubject = `Relance : Candidature Spontanée - Développeur Full-Stack`;
-  const relanceBody = `Bonjour,
+  const relanceSubject = `Follow-Up: Full-Stack Developer Application`;
+  const relanceBody = `Hello,
 
-Je me permets de revenir vers vous concernant ma candidature spontanée transmise la semaine dernière pour un poste de Développeur Full-Stack au sein de ${companyName || 'votre entreprise'}.
+I am following up regarding the application I submitted last week for the Full-Stack Developer position at ${companyName || 'your company'}.
 
-Toujours très enthousiaste à l'idée de pouvoir apporter mes compétences à votre équipe, je serais ravi d'échanger lors d'un bref entretien.
+I remain very enthusiastic about contributing my skills to your team and would be delighted to connect for a brief chat or interview.
 
-Vous trouverez mon CV ci-joint à cet email.
+Please find my resume attached again for your reference.
 
-Je vous remercie par avance pour l'attention portée à mon message.
+Thank you for your time and consideration.
 
-Cordialement,`;
+Best regards,`;
 
   const encodedSubject = encodeURIComponent(relanceSubject);
   const encodedBody = encodeURIComponent(relanceBody);

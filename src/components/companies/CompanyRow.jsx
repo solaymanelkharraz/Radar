@@ -68,7 +68,7 @@ export function CompanyRow({
               <span>{companyName}</span>
               {isFollowUpDue && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase bg-rose-500 text-white px-2 py-0.5 rounded-full animate-bounce">
-                  <AlertTriangle className="w-3 h-3" /> Relance Time!
+                  <AlertTriangle className="w-3 h-3" /> Follow-Up Time!
                 </span>
               )}
             </div>
@@ -128,7 +128,7 @@ export function CompanyRow({
               /* State 3: Relance Already Sent */
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[11px]">
                 <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
-                <span>✓ Relance Envoyée</span>
+                <span>✓ Follow-Up Sent</span>
               </span>
             ) : (
               /* State 4: E-mail 1 Sent, ready to send follow-up anytime */
@@ -138,7 +138,7 @@ export function CompanyRow({
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                <span>Send Follow-Up (Relance)</span>
+                <span>Send Follow-Up</span>
               </button>
             )}
           </div>

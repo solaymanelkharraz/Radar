@@ -11,7 +11,7 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
     phone: '',
     website: '',
     contactStatus: 'Not Contacted',
-    emailSubject: 'Candidature Spontanée : Développeur Full-Stack',
+    emailSubject: 'Application: Full-Stack Developer Position',
     emailBody: '',
     scheduledFor: null,
     relanceSent: false,
@@ -39,7 +39,7 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         phone: companyToEdit.phone || '',
         website: companyToEdit.website || '',
         contactStatus: companyToEdit.contactStatus || 'Not Contacted',
-        emailSubject: companyToEdit.emailSubject || 'Candidature Spontanée : Développeur Full-Stack',
+        emailSubject: companyToEdit.emailSubject || 'Application: Full-Stack Developer Position',
         emailBody: companyToEdit.emailBody || '',
         scheduledFor: companyToEdit.scheduledFor || null,
         relanceSent: companyToEdit.relanceSent ?? false,
@@ -53,7 +53,7 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         phone: '',
         website: '',
         contactStatus: 'Not Contacted',
-        emailSubject: 'Candidature Spontanée : Développeur Full-Stack',
+        emailSubject: 'Application: Full-Stack Developer Position',
         emailBody: '',
         scheduledFor: null,
         relanceSent: false,
@@ -178,7 +178,7 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Candidature Spontanée : Développeur Full-Stack"
+                placeholder="e.g. Application: Full-Stack Developer Position"
                 value={formData.emailSubject}
                 onChange={(e) => setFormData({ ...formData, emailSubject: e.target.value })}
                 className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
@@ -192,7 +192,7 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
               </label>
               <textarea
                 rows="5"
-                placeholder="Bonjour, Je vous adresse ma candidature spontanée pour un poste de Développeur Full-Stack..."
+                placeholder="Hello, I am writing to express my interest in a Full-Stack Developer position..."
                 value={formData.emailBody}
                 onChange={(e) => setFormData({ ...formData, emailBody: e.target.value })}
                 className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono shadow-sm"

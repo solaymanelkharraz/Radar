@@ -36,7 +36,7 @@ const TASKS = [
   },
   {
     id: 'task-5',
-    text: 'Create entry in Vault / Directory (Name, Website, Email/Contact, Key Person) and set status to "À Contacter".',
+    text: 'Create entry in Vault / Directory (Name, Website, Email/Contact, Key Person) and set status to "To Contact".',
     tag: 'Vault Save',
     tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
