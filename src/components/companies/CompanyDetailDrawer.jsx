@@ -17,7 +17,7 @@ import {
   MessageCircle,
   Clock,
 } from 'lucide-react';
-import { handleOpenGmail } from '../../utils/gmailUtils';
+import { handleOpenGmail, handleOpenGmailFollowUp } from '../../utils/gmailUtils';
 import { sanitizeMoroccanPhone, getWhatsAppUrl, getNextScheduledTuesday, getRelancePipelineStatus } from '../../utils/companyUtils';
 
 export function CompanyDetailDrawer({
@@ -54,6 +54,9 @@ export function CompanyDetailDrawer({
   const waUrl = getWhatsAppUrl(phone);
   const pipelineStatus = getRelancePipelineStatus(company);
 
+  const isFollowUpDue = pipelineStatus.rawKey === 'RELANCE_DUE';
+  const isEmailSent = scheduledFor || contactStatus === 'CV Sent';
+
   const handleCopy = () => {
     if (!hrEmail) return;
     navigator.clipboard.writeText(hrEmail);
@@ -69,6 +72,13 @@ export function CompanyDetailDrawer({
       onDraftGmail(id, nextTuesdayISO);
     } else if (onStatusToggle) {
       onStatusToggle(id, 'CV Sent', nextTuesdayISO);
+    }
+  };
+
+  const handleFollowUpClick = () => {
+    handleOpenGmailFollowUp(hrEmail, companyName);
+    if (onToggleRelanceSent) {
+      onToggleRelanceSent(id, true);
     }
   };
 
@@ -241,14 +251,37 @@ export function CompanyDetailDrawer({
                     </button>
                   </div>
 
-                  {/* Draft in Web Gmail Button */}
-                  <button
-                    onClick={handleDraftClick}
-                    className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
-                  >
-                    <Mail className="w-4 h-4 stroke-[2.5]" />
-                    <span>Draft in Web Gmail (Schedule Tuesday 09:30) ↗</span>
-                  </button>
+                  {/* Smart Web Gmail Action Button */}
+                  {!isEmailSent ? (
+                    <button
+                      onClick={handleDraftClick}
+                      className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <Mail className="w-4 h-4 stroke-[2.5]" />
+                      <span>Draft Initial Email in Web Gmail (Schedule Tuesday 09:30) ↗</span>
+                    </button>
+                  ) : isFollowUpDue ? (
+                    <button
+                      onClick={handleFollowUpClick}
+                      className="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md ring-2 ring-rose-500/30 animate-pulse transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <Send className="w-4 h-4 stroke-[2.5]" />
+                      <span>🚨 Send Follow-Up Now (Web Gmail) ↗</span>
+                    </button>
+                  ) : relanceSent ? (
+                    <div className="w-full py-2.5 px-4 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-xs flex items-center justify-center gap-2">
+                      <Check className="w-4 h-4 text-indigo-600" />
+                      <span>✓ Relance Envoyée</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleFollowUpClick}
+                      className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <Send className="w-4 h-4 stroke-[2.5]" />
+                      <span>Send Follow-Up (Relance) in Web Gmail ↗</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <p className="text-xs text-slate-400 italic">No HR email recorded for this company.</p>

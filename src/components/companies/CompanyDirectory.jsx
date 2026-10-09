@@ -136,7 +136,8 @@ export function CompanyDirectory({
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th className="py-3.5 px-6">Company</th>
                 <th className="py-3.5 px-6">Sector</th>
-                <th className="py-3.5 px-6">Pipeline Status & Web Gmail Action</th>
+                <th className="py-3.5 px-6">Pipeline Status</th>
+                <th className="py-3.5 px-6">Gmail Action</th>
                 <th className="py-3.5 px-6 text-right">Details</th>
               </tr>
             </thead>
@@ -155,7 +156,7 @@ export function CompanyDirectory({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="py-16 text-center text-slate-500">
+                  <td colSpan="5" className="py-16 text-center text-slate-500">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <Building2 className="w-10 h-10 text-slate-300" />
                       <p className="text-sm font-medium">No companies match your search or filter.</p>

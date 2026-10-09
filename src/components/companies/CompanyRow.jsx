@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Building2, ChevronRight, Mail, Send, Clock } from 'lucide-react';
-import { handleOpenGmail } from '../../utils/gmailUtils';
+import React from 'react';
+import { Building2, ChevronRight, Mail, Send, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { handleOpenGmail, handleOpenGmailFollowUp } from '../../utils/gmailUtils';
 import { getNextScheduledTuesday, getRelancePipelineStatus } from '../../utils/companyUtils';
 
 export function CompanyRow({
@@ -18,17 +18,16 @@ export function CompanyRow({
     website,
     emailSubject,
     emailBody,
+    scheduledFor,
     relanceSent,
   } = company;
 
   const pipelineStatus = getRelancePipelineStatus(company);
 
-  const handleDraftClick = (e) => {
+  // Initial Email Draft Click
+  const handleInitialDraftClick = (e) => {
     e.stopPropagation();
-    // Open Web Gmail composer
     handleOpenGmail(hrEmail, emailSubject, emailBody, companyName);
-
-    // Lock to next Tuesday at 09:30 AM
     const nextTuesdayISO = getNextScheduledTuesday().toISOString();
     if (onDraftGmail) {
       onDraftGmail(id, nextTuesdayISO);
@@ -37,30 +36,44 @@ export function CompanyRow({
     }
   };
 
-  const handleRelanceClick = (e) => {
+  // Follow-Up (Relance) Draft Click
+  const handleFollowUpClick = (e) => {
     e.stopPropagation();
+    handleOpenGmailFollowUp(hrEmail, companyName);
     if (onToggleRelanceSent) {
-      onToggleRelanceSent(id, !relanceSent);
+      onToggleRelanceSent(id, true);
     }
   };
+
+  const isFollowUpDue = pipelineStatus.rawKey === 'RELANCE_DUE';
+  const isEmailSent = scheduledFor || company.contactStatus === 'CV Sent';
 
   return (
     <tr
       onClick={onClick}
-      className="border-b border-slate-200 hover:bg-slate-50/90 transition-colors group cursor-pointer"
+      className={`border-b border-slate-200 transition-colors group cursor-pointer ${
+        isFollowUpDue ? 'bg-rose-50/50 hover:bg-rose-50' : 'hover:bg-slate-50/90'
+      }`}
     >
       {/* 1. Company Name & Website */}
       <td className="py-4 px-6">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0">
+          <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center flex-shrink-0 ${
+            isFollowUpDue ? 'bg-rose-100 border-rose-300 text-rose-600' : 'bg-blue-50 border-blue-200 text-blue-600'
+          }`}>
             <Building2 className="w-5 h-5" />
           </div>
           <div className="space-y-0.5 min-w-0">
-            <div className="font-bold text-slate-900 text-sm tracking-tight group-hover:text-blue-600 transition-colors truncate">
-              {companyName}
+            <div className="font-bold text-slate-900 text-sm tracking-tight group-hover:text-blue-600 transition-colors truncate flex items-center gap-2">
+              <span>{companyName}</span>
+              {isFollowUpDue && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase bg-rose-500 text-white px-2 py-0.5 rounded-full animate-bounce">
+                  <AlertTriangle className="w-3 h-3" /> Relance Time!
+                </span>
+              )}
             </div>
             {website && (
-              <span className="text-[11px] text-slate-500 block truncate max-w-[200px]">
+              <span className="text-[11px] text-slate-500 block truncate max-w-[190px]">
                 {website.replace(/^https?:\/\//, '')}
               </span>
             )}
@@ -75,50 +88,66 @@ export function CompanyRow({
         </span>
       </td>
 
-      {/* 3. Pipeline Status & Web Gmail Draft Action */}
+      {/* 3. SEPARATE COLUMN: Pipeline Status */}
       <td className="py-4 px-6 text-xs">
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Status Badge */}
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all ${pipelineStatus.bgColor} ${pipelineStatus.textColor} ${pipelineStatus.borderColor} ${
-              pipelineStatus.isHighlighted ? 'ring-2 ring-rose-400/30 animate-pulse' : ''
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>{pipelineStatus.label}</span>
-          </span>
-
-          {/* 1-Click Draft in Web Gmail Button */}
-          {hrEmail && (
-            <button
-              onClick={handleDraftClick}
-              title="Open Web Gmail draft and schedule for next Tuesday at 09:30 AM"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-xs cursor-pointer"
-            >
-              <Mail className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-              <span>Draft in Web Gmail</span>
-            </button>
-          )}
-
-          {/* Quick Action: Marquer Relance Envoyée */}
-          {(pipelineStatus.rawKey === 'RELANCE_DUE' || pipelineStatus.rawKey === 'EMAIL_1_SENT' || relanceSent) && (
-            <button
-              onClick={handleRelanceClick}
-              title={relanceSent ? "Relance mark enabled" : "Click to mark follow-up email as sent"}
-              className={`inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-1 rounded-xl border transition-all cursor-pointer ${
-                relanceSent
-                  ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
-                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200 shadow-2xs'
-              }`}
-            >
-              <Send className="w-3 h-3 text-indigo-600" />
-              <span>{relanceSent ? '✓ Relance Envoyée' : '+ Marquer Relance Envoyée'}</span>
-            </button>
-          )}
-        </div>
+        <span
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all ${pipelineStatus.bgColor} ${pipelineStatus.textColor} ${pipelineStatus.borderColor} ${
+            pipelineStatus.isHighlighted ? 'ring-2 ring-rose-400/40 animate-pulse shadow-sm' : ''
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>{pipelineStatus.label}</span>
+        </span>
       </td>
 
-      {/* 4. Details Arrow */}
+      {/* 4. SEPARATE COLUMN: Smart Gmail Action Button */}
+      <td className="py-4 px-6 text-xs">
+        {hrEmail ? (
+          <div>
+            {!isEmailSent ? (
+              /* State 1: Initial Email Draft */
+              <button
+                onClick={handleInitialDraftClick}
+                title="Draft initial email in Web Gmail & lock to Tuesday 09:30 AM send"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-xs cursor-pointer"
+              >
+                <Mail className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span>Draft in Web Gmail</span>
+              </button>
+            ) : isFollowUpDue ? (
+              /* State 2: Relance Due Alert Button */
+              <button
+                onClick={handleFollowUpClick}
+                title="7 days elapsed! Click to send follow-up pitch in Web Gmail"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-md ring-2 ring-rose-500/30 animate-pulse cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span>🚨 Send Follow-Up Now</span>
+              </button>
+            ) : relanceSent ? (
+              /* State 3: Relance Already Sent */
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold text-[11px]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>✓ Relance Envoyée</span>
+              </span>
+            ) : (
+              /* State 4: E-mail 1 Sent, ready to send follow-up anytime */
+              <button
+                onClick={handleFollowUpClick}
+                title="Open Web Gmail with pre-filled follow-up pitch"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] transition-all active:scale-95 shadow-xs cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span>Send Follow-Up (Relance)</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <span className="text-slate-400 italic text-xs">No HR email</span>
+        )}
+      </td>
+
+      {/* 5. Details Arrow */}
       <td className="py-4 px-6 text-xs text-right">
         <div className="flex items-center justify-end text-slate-400 group-hover:text-blue-600 transition-colors gap-1 font-bold">
           <span>Details</span>
