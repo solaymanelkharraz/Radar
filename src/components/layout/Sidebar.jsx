@@ -173,7 +173,7 @@ export function Sidebar({
             </span>
           </button>
 
-          {/* 4. Search Company (Local Recon) */}
+          {/* 4. Search Company */}
           <button
             onClick={() => setActiveView('search-company')}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -190,12 +190,12 @@ export function Sidebar({
               />
               <span>Search Company</span>
             </div>
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
-              Recon
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+              Local
             </span>
           </button>
 
-          {/* 5. Developer Search (Direct Feeds & Dorks) */}
+          {/* 5. Developer Search (Positioned directly under Search Company) */}
           <button
             onClick={() => setActiveView('developer-search')}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -212,8 +212,8 @@ export function Sidebar({
               />
               <span>Developer Search</span>
             </div>
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">
-              Tech
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 border border-indigo-200">
+              Dev
             </span>
           </button>
 

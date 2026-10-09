@@ -44,20 +44,11 @@ export function Header({
       };
     }
 
-    if (activeView === 'search-company' || activeView === 'search-library') {
+    if (activeView === 'search-library') {
       return {
-        title: 'Search Company (Local Recon)',
-        desc: 'Command center for locating local Tangier tech companies, agencies, and dev shops.',
-        searchPlaceholder: 'Filter local company search queries...',
-        icon: Search,
-      };
-    }
-
-    if (activeView === 'developer-search') {
-      return {
-        title: 'Developer Search (Tangier Openings & Dorks)',
-        desc: 'Pre-filtered developer job feeds and Google X-Ray dorks for Full-Stack, React, and Laravel.',
-        searchPlaceholder: 'Filter developer job feeds & dorks...',
+        title: 'Search Library (Hunting Ground)',
+        desc: 'Command center for sourcing local Tangier tech companies, agencies, and dev shops.',
+        searchPlaceholder: 'Filter search queries & keywords...',
         icon: Search,
       };
     }

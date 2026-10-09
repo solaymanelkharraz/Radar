@@ -7,8 +7,8 @@ import { CompanyDirectory } from './components/companies/CompanyDirectory';
 import { CompanyModal } from './components/companies/CompanyModal';
 import { SourcingCategoryView } from './components/sourcing/SourcingCategoryView';
 import { DailyRoutePage } from './components/sourcing/DailyRoutePage';
-import { SearchCompany } from './components/sourcing/SearchCompany';
-import { DeveloperSearch } from './components/sourcing/DeveloperSearch';
+import { SearchCompanyPage } from './components/sourcing/SearchCompanyPage';
+import { DeveloperSearchPage } from './components/sourcing/DeveloperSearchPage';
 import { SurvivalProtocolPage } from './components/sourcing/SurvivalProtocolPage';
 import { Toast } from './components/ui/Toast';
 import {
@@ -322,7 +322,7 @@ export default function App() {
               </motion.div>
             )}
 
-            {/* 4. Search Company (Local Physical Companies) */}
+            {/* 4. Search Company (Local Recon) */}
             {(activeView === 'search-company' || activeView === 'search-library') && (
               <motion.div
                 key="search-company"
@@ -331,11 +331,11 @@ export default function App() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <SearchCompany searchQuery={searchQuery} />
+                <SearchCompanyPage searchQuery={searchQuery} />
               </motion.div>
             )}
 
-            {/* 5. Developer Search (Pre-filtered Feeds & X-Ray Dorks) */}
+            {/* 5. Developer Search (Dev Feeds & Dorks) */}
             {activeView === 'developer-search' && (
               <motion.div
                 key="developer-search"
@@ -344,7 +344,7 @@ export default function App() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <DeveloperSearch searchQuery={searchQuery} />
+                <DeveloperSearchPage searchQuery={searchQuery} />
               </motion.div>
             )}
 
