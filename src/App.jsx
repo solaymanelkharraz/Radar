@@ -8,6 +8,7 @@ import { CompanyModal } from './components/companies/CompanyModal';
 import { SourcingCategoryView } from './components/sourcing/SourcingCategoryView';
 import { DailyRoutePage } from './components/sourcing/DailyRoutePage';
 import { SearchLibraryPage } from './components/sourcing/SearchLibraryPage';
+import { SurvivalProtocolPage } from './components/sourcing/SurvivalProtocolPage';
 import { Toast } from './components/ui/Toast';
 import {
   subscribeApplications,
@@ -308,6 +309,19 @@ export default function App() {
                 transition={{ duration: 0.15 }}
               >
                 <SearchLibraryPage searchQuery={searchQuery} />
+              </motion.div>
+            )}
+
+            {/* 5. Survival Protocol (Quick-Hire Fallback) */}
+            {activeView === 'survival-protocol' && (
+              <motion.div
+                key="survival-protocol"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <SurvivalProtocolPage />
               </motion.div>
             )}
 

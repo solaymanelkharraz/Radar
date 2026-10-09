@@ -14,6 +14,7 @@ import {
   Radar as RadarIcon,
   CheckSquare,
   Search,
+  LifeBuoy,
 } from 'lucide-react';
 import { isDemoMode } from '../../config/supabaseClient';
 
@@ -40,12 +41,6 @@ export function Sidebar({
       label: '💻 Remote Tech Hub',
       icon: Laptop,
       color: 'text-purple-600',
-    },
-    {
-      id: 'sourcing-local-fallback',
-      label: '🎧 Local Fallback',
-      icon: Headphones,
-      color: 'text-blue-600',
     },
   ];
 
@@ -252,6 +247,26 @@ export function Sidebar({
                 })}
               </div>
             )}
+          </div>
+
+          {/* Discrete Dark-Themed Link: Survival Protocol */}
+          <div className="pt-3 border-t border-slate-100">
+            <button
+              onClick={() => setActiveView('survival-protocol')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeView === 'survival-protocol'
+                  ? 'bg-slate-900 text-rose-300 border border-slate-800 shadow-md ring-1 ring-rose-500/20'
+                  : 'bg-slate-900/90 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-800 shadow-2xs'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <LifeBuoy className="w-4 h-4 text-rose-400" />
+                <span>Survival Protocol</span>
+              </div>
+              <span className="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800">
+                🛟 Fallback
+              </span>
+            </button>
           </div>
         </nav>
       </div>
