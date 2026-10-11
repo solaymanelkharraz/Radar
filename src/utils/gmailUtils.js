@@ -1,22 +1,40 @@
+export const DEFAULT_EMAIL_SUBJECT = 'Candidature Spontanée – Développeur Full-Stack (React / Laravel)';
+
+export const DEFAULT_EMAIL_BODY = `Bonjour l’équipe [Nom de l’entreprise],
+
+Je suis Développeur Full-Stack basé à Tanger, spécialisé dans la conception et le déploiement d’applications web modernes avec React et Laravel. Je suis particulièrement intéressé par [élément spécifique de l’entreprise : vos projets web / votre approche produit / un projet précis], et j’aimerais mettre mes compétences au service de votre équipe.
+
+Titulaire d’un Bac+2 en Développement Digital, j’ai conçu et déployé plusieurs projets concrets :
+• SmartInvoice Pro : plateforme SaaS de facturation B2B avec authentification sécurisée, génération de PDF et tableau de bord.
+• POSTRESA : système de gestion de réservations et d’annonces avec frontend React et backend Laravel.
+• RihlatBladna : plateforme web dédiée à la valorisation et à la découverte du tourisme local.
+
+Technologies principales :
+React · Tailwind CSS · Framer Motion · Laravel · Node.js · Express · MySQL · Firebase · Docker · Git · Vercel · Render
+
+Je recherche actuellement une opportunité en tant que Développeur Full-Stack, en présentiel, hybride ou à distance. Vous trouverez mon CV en pièce jointe ainsi que mon portfolio ci-dessous :
+Portfolio : https://solayman.vercel.app
+
+Je serais heureux d’échanger avec vous au sujet de vos projets et de la manière dont je pourrais contribuer à votre équipe.
+
+Cordialement,
+
+Soulayman Elkharraz
+Développeur Full-Stack
+0711350766`;
+
 export const handleOpenGmail = (hrEmail, subject, body, companyName = '') => {
   if (!hrEmail) {
     alert("No HR email saved for this company.");
     return;
   }
-  const safeSubject = subject || "Application: Full-Stack Developer Position";
-  const defaultBody = `Hello,
+  const safeSubject = subject || DEFAULT_EMAIL_SUBJECT;
+  let safeBody = body || DEFAULT_EMAIL_BODY;
 
-I am writing to express my interest in a Full-Stack Developer position at ${companyName || 'your company'}.
+  if (companyName) {
+    safeBody = safeBody.replaceAll('[Nom de l’entreprise]', companyName);
+  }
 
-Passionate about building modern, scalable, and high-performance web applications, I would welcome the opportunity to present my background and technical capabilities.
-
-Please find my resume attached to this email.
-
-I remain available at your earliest convenience for an interview.
-
-Best regards,`;
-
-  const safeBody = body || defaultBody;
   const encodedSubject = encodeURIComponent(safeSubject);
   const encodedBody = encodeURIComponent(safeBody);
   const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(hrEmail)}&su=${encodedSubject}&body=${encodedBody}`;

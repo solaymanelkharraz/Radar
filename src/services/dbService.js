@@ -1,5 +1,6 @@
 import { supabase, isDemoMode } from '../config/supabaseClient';
 import { INITIAL_APPLICATIONS, INITIAL_COMPANIES } from '../mock/initialData';
+import { DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY } from '../utils/gmailUtils';
 
 const STORAGE_KEYS = {
   APPLICATIONS: 'radar_applications_v2',
@@ -72,8 +73,10 @@ const mapCompanyFromSupabase = (row) => {
     phone: row.phone || row.contact_number || row.contactNumber || row.phone_number || '',
     website: row.website,
     contactStatus,
-    emailSubject: row.email_subject || row.emailSubject || "Application: Full-Stack Developer Position",
-    emailBody: row.email_body !== undefined ? (row.email_body || "") : (row.emailBody || ""),
+    emailSubject: row.email_subject || row.emailSubject || DEFAULT_EMAIL_SUBJECT,
+    emailBody: row.email_body !== undefined && row.email_body !== null && row.email_body !== ''
+      ? row.email_body
+      : (row.emailBody || DEFAULT_EMAIL_BODY),
     scheduledFor,
     relanceSent: row.relance_sent !== undefined ? row.relance_sent : (row.relanceSent ?? false),
     createdAt: row.created_at || row.createdAt,
@@ -88,8 +91,8 @@ const mapCompanyToSupabase = (company) => ({
   phone: company.phone || null,
   website: company.website || null,
   contact_status: company.contactStatus || 'Not Contacted',
-  email_subject: company.emailSubject || "Application: Full-Stack Developer Position",
-  email_body: company.emailBody || null,
+  email_subject: company.emailSubject || DEFAULT_EMAIL_SUBJECT,
+  email_body: company.emailBody || DEFAULT_EMAIL_BODY,
   scheduled_for: company.scheduledFor || null,
   relance_sent: company.relanceSent ?? false,
 });
@@ -369,8 +372,10 @@ export const subscribeCompanies = (callback) => {
                 phone: localMatch.phone || mapped.phone || '',
                 website: mapped.website || localMatch.website,
                 contactStatus: localMatch.contactStatus || mapped.contactStatus || 'Not Contacted',
-                emailSubject: localMatch.emailSubject || mapped.emailSubject || "Application: Full-Stack Developer Position",
-                emailBody: localMatch.emailBody !== undefined ? localMatch.emailBody : (mapped.emailBody || ""),
+                emailSubject: localMatch.emailSubject || mapped.emailSubject || DEFAULT_EMAIL_SUBJECT,
+                emailBody: localMatch.emailBody !== undefined && localMatch.emailBody !== null && localMatch.emailBody !== ''
+                  ? localMatch.emailBody
+                  : (mapped.emailBody || DEFAULT_EMAIL_BODY),
                 scheduledFor: mapped.scheduledFor || localMatch.scheduledFor || null,
                 relanceSent: localMatch.relanceSent !== undefined ? localMatch.relanceSent : (mapped.relanceSent ?? false),
               };
@@ -427,8 +432,8 @@ export const addCompany = async (companyData) => {
   const newItem = {
     ...companyData,
     phone: companyData.phone || '',
-    emailSubject: companyData.emailSubject || "Application: Full-Stack Developer Position",
-    emailBody: companyData.emailBody || "",
+    emailSubject: companyData.emailSubject || DEFAULT_EMAIL_SUBJECT,
+    emailBody: companyData.emailBody || DEFAULT_EMAIL_BODY,
     scheduledFor: companyData.scheduledFor || null,
     relanceSent: companyData.relanceSent ?? false,
   };

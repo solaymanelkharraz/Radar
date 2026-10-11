@@ -17,7 +17,12 @@ import {
   MessageCircle,
   Clock,
 } from 'lucide-react';
-import { handleOpenGmail, handleOpenGmailSearchThread } from '../../utils/gmailUtils';
+import {
+  handleOpenGmail,
+  handleOpenGmailSearchThread,
+  DEFAULT_EMAIL_SUBJECT,
+  DEFAULT_EMAIL_BODY,
+} from '../../utils/gmailUtils';
 import { sanitizeMoroccanPhone, getWhatsAppUrl, getNextScheduledTuesday, getRelancePipelineStatus } from '../../utils/companyUtils';
 
 export function CompanyDetailDrawer({
@@ -274,11 +279,11 @@ export function CompanyDetailDrawer({
               <div className="space-y-2">
                 <div className="text-xs font-semibold text-slate-900 bg-white p-3 rounded-xl border border-slate-200">
                   <span className="text-slate-400 font-normal">Subject: </span>
-                  {emailSubject || "Application: Full-Stack Developer Position"}
+                  {emailSubject || DEFAULT_EMAIL_SUBJECT}
                 </div>
-                {emailBody && (
-                  <div className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200 font-mono whitespace-pre-line leading-relaxed max-h-[140px] overflow-y-auto">
-                    {emailBody}
+                {(emailBody || DEFAULT_EMAIL_BODY) && (
+                  <div className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200 font-mono whitespace-pre-line leading-relaxed max-h-[160px] overflow-y-auto">
+                    {emailBody || DEFAULT_EMAIL_BODY}
                   </div>
                 )}
               </div>

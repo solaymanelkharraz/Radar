@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Building2, Send } from 'lucide-react';
 import { getNextScheduledTuesday } from '../../utils/companyUtils';
+import { DEFAULT_EMAIL_SUBJECT, DEFAULT_EMAIL_BODY } from '../../utils/gmailUtils';
 
 export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
   const [formData, setFormData] = useState({
@@ -12,8 +13,8 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
     phone: '',
     website: '',
     contactStatus: 'Not Contacted',
-    emailSubject: 'Application: Full-Stack Developer Position',
-    emailBody: '',
+    emailSubject: DEFAULT_EMAIL_SUBJECT,
+    emailBody: DEFAULT_EMAIL_BODY,
     scheduledFor: null,
     relanceSent: false,
   });
@@ -40,8 +41,10 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         phone: companyToEdit.phone || '',
         website: companyToEdit.website || '',
         contactStatus: companyToEdit.contactStatus || 'Not Contacted',
-        emailSubject: companyToEdit.emailSubject || 'Application: Full-Stack Developer Position',
-        emailBody: companyToEdit.emailBody || '',
+        emailSubject: companyToEdit.emailSubject || DEFAULT_EMAIL_SUBJECT,
+        emailBody: companyToEdit.emailBody !== undefined && companyToEdit.emailBody !== null && companyToEdit.emailBody !== ''
+          ? companyToEdit.emailBody
+          : DEFAULT_EMAIL_BODY,
         scheduledFor: companyToEdit.scheduledFor || null,
         relanceSent: companyToEdit.relanceSent ?? false,
       });
@@ -54,8 +57,8 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
         phone: '',
         website: '',
         contactStatus: 'Not Contacted',
-        emailSubject: 'Application: Full-Stack Developer Position',
-        emailBody: '',
+        emailSubject: DEFAULT_EMAIL_SUBJECT,
+        emailBody: DEFAULT_EMAIL_BODY,
         scheduledFor: null,
         relanceSent: false,
       });
@@ -188,7 +191,7 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Application: Full-Stack Developer Position"
+                placeholder="e.g. Candidature Spontanée – Développeur Full-Stack (React / Laravel)"
                 value={formData.emailSubject}
                 onChange={(e) => setFormData({ ...formData, emailSubject: e.target.value })}
                 className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm"
@@ -201,8 +204,8 @@ export function CompanyModal({ isOpen, onClose, onSave, companyToEdit }) {
                 Default Email Body Pitch (Optional)
               </label>
               <textarea
-                rows="5"
-                placeholder="Hello, I am writing to express my interest in a Full-Stack Developer position..."
+                rows="12"
+                placeholder="Bonjour l’équipe [Nom de l’entreprise]..."
                 value={formData.emailBody}
                 onChange={(e) => setFormData({ ...formData, emailBody: e.target.value })}
                 className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-mono shadow-sm"
